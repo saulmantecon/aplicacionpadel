@@ -22,7 +22,7 @@ class _CrearUsuarioState extends State<CrearUsuario> {
   final _formKey = GlobalKey<FormState>(); //clave para el formulario
   String? pickedFilePath; //almacenar url de foto
   void enviarFormulario() async {
-    if (_formKey.currentState!.validate()) {
+    if (_formKey.currentState!.validate() && pickedFilePath!=null && pickedFilePath!.isNotEmpty) {
       _formKey.currentState!.save(); // Guarda los valores en las variables
 
       Usuario usuario = Usuario(
@@ -137,9 +137,11 @@ class _CrearUsuarioState extends State<CrearUsuario> {
                             source: ImageSource.gallery,
                             imageQuality:
                                 100); //imageSource.gallery para galeria y .camera para la camera
-                        setState(() {
-                          pickedFilePath = pickedFile!.path;
-                        });
+                        if (pickedFile!=null){
+                          setState(() {
+                            pickedFilePath = pickedFile!.path;
+                          });
+                        }
                       },
                       icon: const Icon(Icons.camera_alt_outlined),
                       color: Colors.black))

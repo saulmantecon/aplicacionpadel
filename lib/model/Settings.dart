@@ -1,5 +1,6 @@
+import 'package:aplicacionpadel/CRUD/ModificarUsuario.dart';
 import 'package:flutter/material.dart';
-import 'package:aplicacionpadel/util/CrearUsuario.dart';
+import 'package:aplicacionpadel/CRUD/CrearUsuario.dart';
 class Settings extends StatefulWidget {
   const Settings({super.key});
 
@@ -9,10 +10,17 @@ class Settings extends StatefulWidget {
 
 class _SettingsState extends State<Settings> {
   bool _showCrearUsuarioForm = false;// Controla la visibilidad del formulario
+  bool _showModificarUsuarioForm = false;
 
   void _toggleCrearUsuarioForm() {
     setState(() {
       _showCrearUsuarioForm = !_showCrearUsuarioForm;
+    });
+  }
+
+  void _toggleModificarUsuarioForm() {
+    setState(() {
+      _showModificarUsuarioForm = !_showModificarUsuarioForm;
     });
   }
 
@@ -33,7 +41,7 @@ class _SettingsState extends State<Settings> {
               ),
               const SizedBox(height: 50),
               ElevatedButton(
-                onPressed: (){},
+                onPressed: (_toggleModificarUsuarioForm),
                 child: const Text("Modificar usuario"),
               ),
               const SizedBox(height: 50),
@@ -46,8 +54,9 @@ class _SettingsState extends State<Settings> {
               if (_showCrearUsuarioForm)
                 const CrearUsuario(), // Instancia de tu formulario
               const SizedBox(height: 50),
-              // Aquí se muestra el formulario si _showCrearUsuarioForm es true
-            // Instancia de tu formulario
+              if (_showModificarUsuarioForm)
+                const ModificarUsuario(), // Instancia de tu formulario
+              const SizedBox(height: 50),
             ],
           ),
         )
