@@ -1,8 +1,9 @@
 import 'package:aplicacionpadel/BD/DbUsuario.dart';
+import 'package:aplicacionpadel/model/Usuario.dart';
 import 'package:aplicacionpadel/util/ProductImage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:aplicacionpadel/model/Usuario.dart';
+import 'package:searchfield/searchfield.dart';
 
 class ModificarUsuario extends StatefulWidget {
   const ModificarUsuario({super.key});
@@ -12,14 +13,15 @@ class ModificarUsuario extends StatefulWidget {
 }
 
 class _ModificarUsuarioState extends State<ModificarUsuario> {
-  String? nombreUsuario;
-  String? nombre;
-  String? apellido;
-  int? edad;
-  List<Usuario> listaUsuarios = [];
   final _formKey = GlobalKey<FormState>(); // Clave para el formulario
   String? pickedFilePath; // Almacenar URL de foto
-  final _taskController = TextEditingController();
+  late final TextEditingController _controllerNombre = TextEditingController();
+  late final TextEditingController _controllerNombreUsuario = TextEditingController();
+  late final TextEditingController _controllerApellido = TextEditingController();
+  late final TextEditingController _controllerEdad = TextEditingController();
+  int? puntos;
+  int? id;
+  List<Usuario> listaUsuarios = [];
 
   @override
   void initState() {
@@ -43,10 +45,10 @@ class _ModificarUsuarioState extends State<ModificarUsuario> {
       Usuario usuario = Usuario(
         idUsuario: 0,
         // Aquí podrías usar un ID adecuado
-        nombreUsuario: nombreUsuario!,
-        nombre: nombre!,
-        apellido: apellido!,
-        edad: edad!,
+        nombreUsuario: _controllerNombreUsuario.text,
+        nombre: _controllerNombre.text,
+        apellido: _controllerApellido.text,
+        edad: int.parse(_controllerEdad.text),
         puntos: 0, // Si es necesario, asigna puntos iniciales
       );
 
@@ -80,26 +82,40 @@ class _ModificarUsuarioState extends State<ModificarUsuario> {
         key: _formKey,
         child: Column(
           children: [
-            const Text(
-              "Lista de usuarios:",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-            SizedBox(
-              height: 200, // Define un tamaño fijo para la lista
-              child: ListView.builder(
-                itemCount: listaUsuarios.length,
-                itemBuilder: (context, index) {
-                  final usuario = listaUsuarios[index];
-                  return ListTile(
-                    title: Text(usuario.nombreUsuario),
-                    subtitle: Text('${usuario.nombre} ${usuario.apellido}'),
-                  );
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: SearchField<Usuario>(
+                suggestions: listaUsuarios
+                    .map((usuario) => SearchFieldListItem<Usuario>(
+                          usuario.nombreUsuario,
+                          // Lo que se muestra en el campo de búsqueda
+                          item: usuario, // El objeto que está asociado
+                        ))
+                    .toList(),
+                suggestionState: Suggestion.expand,
+                textInputAction: TextInputAction.done,
+                hint: 'Buscar usuario',
+                onSuggestionTap: (selectedItem) {
+                  final usuario = selectedItem.item;
+                  if (usuario != null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                          content: Text(
+                              'Seleccionaste: ${usuario.nombreUsuario}')
+                      ));
+                    _controllerNombre.text = usuario.nombreUsuario;
+                    _controllerNombre.text = usuario.nombre;
+                    _controllerApellido.text = usuario.apellido;
+                    _controllerEdad.text = usuario.edad.toString();
+                    puntos = usuario.puntos;
+                    id = usuario.idUsuario;
+                  }
                 },
               ),
             ),
             const SizedBox(height: 20),
             TextFormField(
+              controller: _controllerNombre,
               decoration: const InputDecoration(
                 labelText: "Introduce un nombre de usuario",
                 hintText: "Nombre de usuario",
@@ -111,7 +127,7 @@ class _ModificarUsuarioState extends State<ModificarUsuario> {
                 return null;
               },
               onSaved: (value) {
-                nombreUsuario = value;
+                _controllerNombreUsuario.text = value!;
               },
             ),
             TextFormField(
@@ -126,7 +142,7 @@ class _ModificarUsuarioState extends State<ModificarUsuario> {
                 return null;
               },
               onSaved: (value) {
-                nombre = value;
+                _controllerNombre.text = value!;
               },
             ),
             TextFormField(
@@ -141,7 +157,7 @@ class _ModificarUsuarioState extends State<ModificarUsuario> {
                 return null;
               },
               onSaved: (value) {
-                apellido = value;
+                _controllerApellido.text = value!;
               },
             ),
             TextFormField(
@@ -158,7 +174,7 @@ class _ModificarUsuarioState extends State<ModificarUsuario> {
                 return null;
               },
               onSaved: (value) {
-                edad = int.tryParse(value ?? '') ?? 0;
+                _controllerEdad.text = value!;
               },
             ),
             const SizedBox(height: 20),

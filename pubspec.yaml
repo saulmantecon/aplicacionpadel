@@ -11,6 +11,7 @@ dependencies:
     sdk: flutter
   image_picker: ^1.1.2
   sqflite_common_ffi: ^2.3.4+4
+  searchfield: ^1.2.2
   path: ^1.8.0
 
 
