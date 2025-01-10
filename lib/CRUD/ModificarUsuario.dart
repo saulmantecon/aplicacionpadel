@@ -79,7 +79,6 @@ class _ModificarUsuarioState extends State<ModificarUsuario> {
     return Form(
         key: _formKey,
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
               "Lista de usuarios:",

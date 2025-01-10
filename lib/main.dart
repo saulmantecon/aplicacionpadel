@@ -2,9 +2,6 @@ import 'package:flutter/material.dart';
 import 'model/Game.dart';
 import 'model/Home.dart';
 import 'model/Settings.dart';
-import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-import 'package:sqflite_common_ffi/windows/sqflite_ffi_setup.dart';
-import 'package:path/path.dart';
 
 
 void main() async{
