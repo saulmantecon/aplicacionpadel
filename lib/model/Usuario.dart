@@ -39,4 +39,9 @@ class Usuario {
       puntos: map['puntos'] ?? 0,  // Si no hay 'puntos', asignar 0 como valor predeterminado
     );
   }
+
+  @override
+  String toString() {
+    return 'Usuario{idUsuario: $idUsuario, nombreUsuario: $nombreUsuario, nombre: $nombre, apellido: $apellido, edad: $edad, puntos: $puntos}';
+  }
 }

@@ -15,10 +15,10 @@ class ModificarUsuario extends StatefulWidget {
 class _ModificarUsuarioState extends State<ModificarUsuario> {
   final _formKey = GlobalKey<FormState>(); // Clave para el formulario
   String? pickedFilePath; // Almacenar URL de foto
-  late final TextEditingController _controllerNombre = TextEditingController();
-  late final TextEditingController _controllerNombreUsuario = TextEditingController();
-  late final TextEditingController _controllerApellido = TextEditingController();
-  late final TextEditingController _controllerEdad = TextEditingController();
+  late final TextEditingController _controllerNombreUsuario;
+  late final TextEditingController _controllerNombre;
+  late final TextEditingController _controllerApellido;
+  late final TextEditingController _controllerEdad;
   int? puntos;
   int? id;
   List<Usuario> listaUsuarios = [];
@@ -26,6 +26,10 @@ class _ModificarUsuarioState extends State<ModificarUsuario> {
   @override
   void initState() {
     super.initState();
+    _controllerNombreUsuario = TextEditingController();
+    _controllerNombre = TextEditingController();
+    _controllerApellido = TextEditingController();
+    _controllerEdad = TextEditingController();
     obtenerUsuarios();
   }
 
@@ -43,17 +47,16 @@ class _ModificarUsuarioState extends State<ModificarUsuario> {
       _formKey.currentState!.save(); // Guarda los valores en las variables
 
       Usuario usuario = Usuario(
-        idUsuario: 0,
-        // Aquí podrías usar un ID adecuado
+        idUsuario: id!,
         nombreUsuario: _controllerNombreUsuario.text,
         nombre: _controllerNombre.text,
         apellido: _controllerApellido.text,
         edad: int.parse(_controllerEdad.text),
-        puntos: 0, // Si es necesario, asigna puntos iniciales
+        puntos: 0,
       );
 
       try {
-        // Intentamos actualizar el usuario en la base de datos
+        // Intento actualizar el usuario en la base de datos
         await DbUsuario.update(usuario);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Usuario actualizado exitosamente')),
@@ -98,12 +101,10 @@ class _ModificarUsuarioState extends State<ModificarUsuario> {
                 onSuggestionTap: (selectedItem) {
                   final usuario = selectedItem.item;
                   if (usuario != null) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                          content: Text(
-                              'Seleccionaste: ${usuario.nombreUsuario}')
-                      ));
-                    _controllerNombre.text = usuario.nombreUsuario;
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        content:
+                            Text('Seleccionaste: ${usuario.nombreUsuario}')));
+                    _controllerNombreUsuario.text = usuario.nombreUsuario;
                     _controllerNombre.text = usuario.nombre;
                     _controllerApellido.text = usuario.apellido;
                     _controllerEdad.text = usuario.edad.toString();
@@ -115,7 +116,7 @@ class _ModificarUsuarioState extends State<ModificarUsuario> {
             ),
             const SizedBox(height: 20),
             TextFormField(
-              controller: _controllerNombre,
+              controller: _controllerNombreUsuario,
               decoration: const InputDecoration(
                 labelText: "Introduce un nombre de usuario",
                 hintText: "Nombre de usuario",
@@ -131,6 +132,7 @@ class _ModificarUsuarioState extends State<ModificarUsuario> {
               },
             ),
             TextFormField(
+              controller: _controllerNombre,
               decoration: const InputDecoration(
                 labelText: "Introduce un nombre",
                 hintText: "Nombre",
@@ -146,6 +148,7 @@ class _ModificarUsuarioState extends State<ModificarUsuario> {
               },
             ),
             TextFormField(
+              controller: _controllerApellido,
               decoration: const InputDecoration(
                 labelText: "Introduce tu apellido",
                 hintText: "Apellido",
@@ -161,6 +164,7 @@ class _ModificarUsuarioState extends State<ModificarUsuario> {
               },
             ),
             TextFormField(
+              controller: _controllerEdad,
               decoration: const InputDecoration(
                 labelText: "Introduce tu edad",
                 hintText: "Edad",

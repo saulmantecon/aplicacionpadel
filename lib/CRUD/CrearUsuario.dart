@@ -36,7 +36,6 @@ class _CrearUsuarioState extends State<CrearUsuario> {
         puntos: 0,
       );
 
-
       try {
 
         // Intenta insertar el usuario en la base de datos
