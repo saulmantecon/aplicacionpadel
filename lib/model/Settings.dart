@@ -1,6 +1,8 @@
+import 'package:aplicacionpadel/CRUD/CrearUsuario.dart';
+import 'package:aplicacionpadel/CRUD/EliminarUsuario.dart';
 import 'package:aplicacionpadel/CRUD/ModificarUsuario.dart';
 import 'package:flutter/material.dart';
-import 'package:aplicacionpadel/CRUD/CrearUsuario.dart';
+
 class Settings extends StatefulWidget {
   const Settings({super.key});
 
@@ -9,8 +11,9 @@ class Settings extends StatefulWidget {
 }
 
 class _SettingsState extends State<Settings> {
-  bool _showCrearUsuarioForm = false;// Controla la visibilidad del formulario
+  bool _showCrearUsuarioForm = false; // Controla la visibilidad del formulario
   bool _showModificarUsuarioForm = false;
+  bool _showEliminarUsuarioForm = false;
 
   void _toggleCrearUsuarioForm() {
     setState(() {
@@ -24,43 +27,50 @@ class _SettingsState extends State<Settings> {
     });
   }
 
+  void _toggleEliminarUsuarioForm() {
+    setState(() {
+      _showEliminarUsuarioForm = !_showEliminarUsuarioForm;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: SingleChildScrollView(
-
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const SizedBox(height: 50),
-              ElevatedButton(
-                onPressed: _toggleCrearUsuarioForm, // Muestra/oculta el formulario
-                child: const Text("Crear usuario"),
-              ),
-              const SizedBox(height: 50),
-              ElevatedButton(
-                onPressed: (_toggleModificarUsuarioForm),
-                child: const Text("Modificar usuario"),
-              ),
-              const SizedBox(height: 50),
-              ElevatedButton(
-                onPressed: () {},
-                child: const Text("Eliminar usuario"),
-              ),
-              const SizedBox(height: 50),
-              // Aquí se muestra el formulario si _showCrearUsuarioForm es true
-              if (_showCrearUsuarioForm)
-                const CrearUsuario(), // Instancia de tu formulario
-              const SizedBox(height: 50),
-              if (_showModificarUsuarioForm)
-                const ModificarUsuario(), // Instancia de tu formulario
-              const SizedBox(height: 50),
-            ],
-          ),
-        )
-      ),
+          child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const SizedBox(height: 50),
+            ElevatedButton(
+              onPressed: _toggleCrearUsuarioForm,
+              // Muestra/oculta el formulario
+              child: const Text("Crear usuario"),
+            ),
+            const SizedBox(height: 50),
+            ElevatedButton(
+              onPressed: (_toggleModificarUsuarioForm),
+              child: const Text("Modificar usuario"),
+            ),
+            const SizedBox(height: 50),
+            ElevatedButton(
+              onPressed: (_toggleEliminarUsuarioForm),
+              child: const Text("Eliminar usuario"),
+            ),
+            const SizedBox(height: 50),
+            // Aquí se muestra el formulario si _showCrearUsuarioForm es true
+            if (_showCrearUsuarioForm)
+              const CrearUsuario(), // Instancia de tu formulario
+            const SizedBox(height: 50),
+            if (_showModificarUsuarioForm)
+              const ModificarUsuario(), // Instancia de tu formulario
+            const SizedBox(height: 50),
+            if (_showEliminarUsuarioForm)
+              const EliminarUsuario(), // Instancia de tu formulario
+            const SizedBox(height: 50),
+          ],
+        ),
+      )),
     );
   }
 }

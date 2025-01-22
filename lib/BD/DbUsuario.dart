@@ -51,9 +51,9 @@ class DbUsuario {
   }//listarUsuarios
 
   // Método para eliminar un usuario por su id
-  static Future<void> delete(Usuario usuario) async {
+  static Future<void> delete(int idUsuario) async {
     final db = await _openDB();
-    await db.delete("usuarios", where: "idUsuario = ?", whereArgs: [usuario.idUsuario]);
+    await db.delete("usuarios", where: "idUsuario = ?", whereArgs: [idUsuario]);
   }//delete
 
   // Método para actualizar un usuario

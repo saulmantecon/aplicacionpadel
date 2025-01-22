@@ -17,7 +17,9 @@ class Usuario {
     this.puntos = 0,
   });
 
-  // Método para convertir la instancia de la clase a un Map para almacenarla en la base de datos
+
+
+
   Map<String, dynamic> toMap() {
     return {
       "nombreUsuario": nombreUsuario,
