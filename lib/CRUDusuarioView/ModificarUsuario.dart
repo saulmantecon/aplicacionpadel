@@ -186,7 +186,7 @@ class _ModificarUsuarioState extends State<ModificarUsuario> {
               children: [
                 ProductImage(urlPath: pickedFilePath),
                 Positioned(
-                  top: 65,
+                  top: 50,
                   right: 25,
                   child: IconButton(
                     onPressed: () async {

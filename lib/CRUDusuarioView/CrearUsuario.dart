@@ -1,5 +1,4 @@
-import 'dart:ffi';
-import 'dart:io';
+
 import 'package:aplicacionpadel/model/Usuario.dart';
 import 'package:aplicacionpadel/util/ProductImage.dart';
 import 'package:flutter/material.dart';
@@ -131,7 +130,7 @@ class _CrearUsuarioState extends State<CrearUsuario> {
               ),
                */
                 Positioned(
-                    top: 65,
+                    top: 50,
                     right: 25,
                     child: IconButton(
                         onPressed: () async {

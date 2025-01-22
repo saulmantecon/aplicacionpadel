@@ -1,6 +1,6 @@
-import 'package:aplicacionpadel/CRUD/CrearUsuario.dart';
-import 'package:aplicacionpadel/CRUD/EliminarUsuario.dart';
-import 'package:aplicacionpadel/CRUD/ModificarUsuario.dart';
+import 'package:aplicacionpadel/CRUDusuarioView//CrearUsuario.dart';
+import 'package:aplicacionpadel/CRUDusuarioView//EliminarUsuario.dart';
+import 'package:aplicacionpadel/CRUDusuarioView//ModificarUsuario.dart';
 import 'package:flutter/material.dart';
 
 class Settings extends StatefulWidget {
