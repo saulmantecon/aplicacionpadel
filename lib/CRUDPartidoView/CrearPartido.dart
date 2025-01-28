@@ -22,7 +22,7 @@ class _CrearPartidoState extends State<CrearPartido> {
       child: Form(
         key: _formKey,
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             TextFormField(
               decoration: const InputDecoration(

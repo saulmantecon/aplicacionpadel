@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:aplicacionpadel/BD/DbUsuario.dart';
 import 'package:aplicacionpadel/model/Usuario.dart';
 import 'package:aplicacionpadel/util/ProductImage.dart';
@@ -19,9 +21,11 @@ class _ModificarUsuarioState extends State<ModificarUsuario> {
   late final TextEditingController _controllerNombre;
   late final TextEditingController _controllerApellido;
   late final TextEditingController _controllerEdad;
+  late final TextEditingController _controllerContrasena;
   int? puntos;
   int? id;
   List<Usuario> listaUsuarios = [];
+  bool _obscureText = true;
 
   @override
   void initState() {
@@ -30,6 +34,7 @@ class _ModificarUsuarioState extends State<ModificarUsuario> {
     _controllerNombre = TextEditingController();
     _controllerApellido = TextEditingController();
     _controllerEdad = TextEditingController();
+    _controllerContrasena = TextEditingController();
     obtenerUsuarios();
   }
 
@@ -41,18 +46,18 @@ class _ModificarUsuarioState extends State<ModificarUsuario> {
   }
 
   void enviarFormulario() async {
-    if (_formKey.currentState!.validate() &&
-        pickedFilePath != null &&
-        pickedFilePath!.isNotEmpty) {
+    if (_formKey.currentState!.validate() && pickedFilePath != null && pickedFilePath!.isNotEmpty) {
       _formKey.currentState!.save(); // Guarda los valores en las variables
 
       Usuario usuario = Usuario(
         idUsuario: id!,
         nombreUsuario: _controllerNombreUsuario.text,
+        contrasena: _controllerContrasena.text,
         nombre: _controllerNombre.text,
         apellido: _controllerApellido.text,
         edad: int.parse(_controllerEdad.text),
         puntos: 0,
+        imagen: pickedFilePath!,
       );
 
       try {
@@ -104,12 +109,17 @@ class _ModificarUsuarioState extends State<ModificarUsuario> {
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                         content:
                             Text('Seleccionaste: ${usuario.nombreUsuario}')));
+                   // print(usuario.imagen);
                     _controllerNombreUsuario.text = usuario.nombreUsuario;
                     _controllerNombre.text = usuario.nombre;
                     _controllerApellido.text = usuario.apellido;
                     _controllerEdad.text = usuario.edad.toString();
+                    _controllerContrasena.text = usuario.contrasena;
                     puntos = usuario.puntos;
                     id = usuario.idUsuario;
+                    setState(() {
+                      pickedFilePath = usuario.imagen;
+                    });
                   }
                 },
               ),
@@ -130,6 +140,33 @@ class _ModificarUsuarioState extends State<ModificarUsuario> {
               onSaved: (value) {
                 _controllerNombreUsuario.text = value!;
               },
+            ),
+            TextFormField(
+              controller: _controllerContrasena,
+              obscureText: _obscureText,
+              // Esto oculta el texto ingresado (se muestra como puntos o asteriscos)
+              decoration: InputDecoration(
+                labelText: 'Contraseña', // Etiqueta para el campo
+                hintText: 'Ingresa tu contraseña', // Texto de ayuda
+                suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscureText ? Icons.visibility_off : Icons.visibility,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _obscureText =
+                        !_obscureText; // Cambia el valor de obscureText
+                      });
+                    } // Icono que puede cambiar para mostrar/ocultar la contraseña
+                ),
+              ),
+              validator: (value){
+                if (value == null || value.isEmpty) {
+                  return "Introduzca un nombre de usuario correcto";
+                }
+                return null;
+              },
+              onSaved: (value) => _controllerContrasena.text = value!,
             ),
             TextFormField(
               controller: _controllerNombre,
@@ -196,8 +233,9 @@ class _ModificarUsuarioState extends State<ModificarUsuario> {
                         imageQuality: 100,
                       );
                       if (pickedFile != null) {
+                        final bytes = await pickedFile.readAsBytes();
                         setState(() {
-                          pickedFilePath = pickedFile.path;
+                          pickedFilePath = base64Encode(bytes); // Convertimos la imagen a Base64
                         });
                       }
                     },

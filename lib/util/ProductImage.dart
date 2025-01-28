@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -39,8 +40,24 @@ Widget _getImage(String? urlPath) {
       fit: BoxFit.contain,
     );
   }
-  return Image.file(File(urlPath), fit: BoxFit.contain);
+
+  // Verificar si la cadena parece ser Base64
+  if (urlPath.startsWith('/')) {
+    // Asumimos que es una ruta de archivo
+    return Image.file(File(urlPath), fit: BoxFit.contain);
+  } else {
+    try {
+      final bytes = base64Decode(urlPath);
+      return Image.memory(bytes, fit: BoxFit.contain);
+    } catch (e) {
+      return const Image(
+        image: AssetImage("assets/images/placeholder.png"),
+        fit: BoxFit.contain,
+      );
+    }
+  }
 }
+
 
 BoxDecoration _buildBoxDecoration() {
   return const BoxDecoration(

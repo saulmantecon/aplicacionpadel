@@ -29,6 +29,7 @@ class BottomNavigation extends StatefulWidget {
 }
 
 class _BottomNavigationState extends State<BottomNavigation> {
+
   // Lista de páginas para cada índice
   final List<Widget> _pages = [
     const Home(),
