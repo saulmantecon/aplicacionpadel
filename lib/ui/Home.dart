@@ -1,4 +1,8 @@
+import 'package:aplicacionpadel/model/Partido.dart';
+import 'package:aplicacionpadel/util/ContainerPartido.dart';
+import 'package:aplicacionpadel/viewmodel/PartidoViewModel.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../CRUDPartidoView/CrearPartido.dart';
 
 class Home extends StatelessWidget {
@@ -18,9 +22,7 @@ class Home extends StatelessWidget {
         label: const Text("Crear partido"),
         icon: const Icon(Icons.add_circle_outline),
       ),
-      body: const Center(
-        child: Text("Pantalla principal"),
-      ),
+      body: HomeView(),
     );
   }
 }
@@ -35,8 +37,30 @@ class HomeView extends StatefulWidget {
 
 class _HomeViewState extends State<HomeView> {
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    Future.delayed(Duration.zero, () {
+      if(mounted){
+        Provider.of<PartidoViewModel>(context, listen: false).cargarPartidos();
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    final partidoVM = Provider.of<PartidoViewModel>(context);
+    return GridView.builder(
+      gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+        maxCrossAxisExtent: 500,
+        crossAxisSpacing: 10,
+        mainAxisSpacing: 10,
+      ),
+      itemCount: partidoVM.listaPartidos.length,
+      itemBuilder: (context, index) {
+        final partido = partidoVM.listaPartidos[index];
+        return Containerpartido(partido: partido);
+      },
+    );
   }
 }
-

@@ -1,8 +1,11 @@
 import 'package:aplicacionpadel/BD/DbPartido.dart';
 import 'package:aplicacionpadel/model/Partido.dart';
 import 'package:aplicacionpadel/util/DateAndTimePicker.dart';
+import 'package:aplicacionpadel/viewmodel/PartidoViewModel.dart';
+import 'package:aplicacionpadel/viewmodel/UsuarioViewModel.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 class CrearPartido extends StatefulWidget {
   const CrearPartido({super.key});
@@ -16,14 +19,17 @@ class _CrearPartidoState extends State<CrearPartido> {
   String? _lugarDelPartido;
   String? _fechaHoraSeleccionada;
 
-  void enviarFormulario() async{
+  void enviarFormulario(PartidoViewModel partidoVM, UsuarioViewModel usuarioVM) async{
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save(); // Guarda los valores en las variables
-      Partido partido = Partido(lugar: _lugarDelPartido!, fecha: _fechaHoraSeleccionada!);
+      Partido partido = Partido(lugar: _lugarDelPartido!, fecha: _fechaHoraSeleccionada!, creador: usuarioVM.usuarioActual!);
       try{
         await DbPartido.insert(partido);
         ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Partido registrado exitosamente')));
+
+        partidoVM.agregarPartido(partido);
+
         _formKey.currentState!.reset();
         Navigator.pop(context);
       }catch(e){
@@ -41,6 +47,8 @@ class _CrearPartidoState extends State<CrearPartido> {
 
   @override
   Widget build(BuildContext context) {
+    final partidoVM = Provider.of<PartidoViewModel>(context);
+    final usuarioVM = Provider.of<UsuarioViewModel>(context);
     return Scaffold(
       appBar: AppBar(
         title: const Text("Crear Partido"),
@@ -85,7 +93,7 @@ class _CrearPartidoState extends State<CrearPartido> {
               ),
               const SizedBox(height: 20),
               ElevatedButton(
-                onPressed: enviarFormulario ,
+                onPressed: () => enviarFormulario(partidoVM, usuarioVM) ,
                 child: const Text("Guardar Partido"),
               ),
             ],

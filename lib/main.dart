@@ -1,4 +1,6 @@
 import 'package:aplicacionpadel/CRUDPartidoView/CrearPartido.dart';
+import 'package:aplicacionpadel/CRUDusuarioView/LoginUsuario.dart';
+import 'package:aplicacionpadel/viewmodel/PartidoViewModel.dart';
 import 'package:aplicacionpadel/viewmodel/UsuarioViewModel.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -9,7 +11,8 @@ import 'ui/Settings.dart';
 
 void main() async {
   runApp(MultiProvider(providers: [
-    ChangeNotifierProvider(create: (context) => UsuarioViewModel())
+    ChangeNotifierProvider(create: (context) => UsuarioViewModel()),
+    ChangeNotifierProvider(create: (context) => PartidoViewModel()),
   ],
   child: const AplicacionPadel(),));
 }
@@ -26,7 +29,7 @@ class AplicacionPadel extends StatelessWidget {
 
       },
       debugShowCheckedModeBanner: false,
-      home: BottomNavigation(),
+      home: Loginusuario(),
     );
   }
 }

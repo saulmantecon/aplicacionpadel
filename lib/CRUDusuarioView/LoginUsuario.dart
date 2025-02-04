@@ -18,7 +18,7 @@ class _LoginusuarioState extends State<Loginusuario> {
   String? contrasena;
 
   void enviarFormulario(BuildContext context) async {
-    final usuarioVM = Provider.of<UsuarioViewModel>(context);
+    final usuarioVM = Provider.of<UsuarioViewModel>(context, listen: false);
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
       try {
@@ -27,6 +27,7 @@ class _LoginusuarioState extends State<Loginusuario> {
         if (usuario != null) {
           usuarioVM.usuarioActual = usuario;
           if (context.mounted) {
+            Navigator.pushReplacementNamed(context, "/BottomNavigation");
             ScaffoldMessenger.of(context)
                 .showSnackBar(const SnackBar(content: Text('Login correcto')));
           }
@@ -69,7 +70,6 @@ class _LoginusuarioState extends State<Loginusuario> {
                   onSaved: (value) => nombreUsuario = value),
               TextFormField(
                 obscureText: _obscureText,
-                // Esto oculta el texto ingresado (se muestra como puntos o asteriscos)
                 decoration: InputDecoration(
                   labelText: 'Contraseña', // Etiqueta para el campo
                   hintText: 'Ingresa tu contraseña', // Texto de ayuda
@@ -79,8 +79,7 @@ class _LoginusuarioState extends State<Loginusuario> {
                       ),
                       onPressed: () {
                         setState(() {
-                          _obscureText =
-                              !_obscureText; // Cambia el valor de obscureText
+                          _obscureText = !_obscureText; // Cambia el valor de obscureText
                         });
                       } // Icono que puede cambiar para mostrar/ocultar la contraseña
                       ),
