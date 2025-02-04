@@ -1,5 +1,5 @@
 class Usuario {
-  int idUsuario;
+  int? idUsuario;
   String nombreUsuario;
   String contrasena;
   String nombre;
@@ -11,7 +11,7 @@ class Usuario {
   // Constructor para inicializar los campos
   Usuario({
 
-    required this.idUsuario,
+    this.idUsuario,
     required this.nombreUsuario,
     required this.contrasena,
     required this.nombre,

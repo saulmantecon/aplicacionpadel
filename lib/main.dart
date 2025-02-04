@@ -1,20 +1,30 @@
+import 'package:aplicacionpadel/CRUDPartidoView/CrearPartido.dart';
+import 'package:aplicacionpadel/viewmodel/UsuarioViewModel.dart';
 import 'package:flutter/material.dart';
-import 'model/Game.dart';
-import 'model/Home.dart';
-import 'model/Settings.dart';
+import 'package:provider/provider.dart';
 
+import 'ui/Game.dart';
+import 'ui/Home.dart';
+import 'ui/Settings.dart';
 
-void main() async{
-  runApp(const AplicacionPadel());
+void main() async {
+  runApp(MultiProvider(providers: [
+    ChangeNotifierProvider(create: (context) => UsuarioViewModel())
+  ],
+  child: const AplicacionPadel(),));
 }
 
 class AplicacionPadel extends StatelessWidget {
   const AplicacionPadel({super.key});
 
-
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
+      routes: {
+        "/crearPartido" : (context) => CrearPartido(),
+        "/BottomNavigation" : (context) => BottomNavigation(),
+
+      },
       debugShowCheckedModeBanner: false,
       home: BottomNavigation(),
     );
@@ -29,7 +39,6 @@ class BottomNavigation extends StatefulWidget {
 }
 
 class _BottomNavigationState extends State<BottomNavigation> {
-
   // Lista de páginas para cada índice
   final List<Widget> _pages = [
     const Home(),
@@ -38,11 +47,13 @@ class _BottomNavigationState extends State<BottomNavigation> {
   ];
 
   //Lista de botones
-  final List <BottomNavigationBarItem> _listaBotones = List.of([
+  final List<BottomNavigationBarItem> _listaBotones = List.of([
     const BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
     const BottomNavigationBarItem(icon: Icon(Icons.add), label: "Games"),
-    const BottomNavigationBarItem(icon: Icon(Icons.settings), label: "Settings")]);
+    const BottomNavigationBarItem(icon: Icon(Icons.settings), label: "Settings")
+  ]);
   int _currentIndex = 0;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -55,12 +66,8 @@ class _BottomNavigationState extends State<BottomNavigation> {
           });
         },
       ),
-      body: _pages[_currentIndex], // Muestra la página correspondiente al índice seleccionado
+      body: _pages[
+          _currentIndex], // Muestra la página correspondiente al índice seleccionado
     );
   }
 }
-
-
-
-
-

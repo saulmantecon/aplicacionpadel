@@ -84,7 +84,7 @@ class _EliminarUsuarioState extends State<EliminarUsuario> {
                   if (usuarioSelect != null) {
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Seleccionaste: ${usuarioSelect.nombreUsuario}')));
                     _controllerNombreUsuario.text = usuarioSelect.nombreUsuario;
-                    id = usuarioSelect.idUsuario;
+                    id = usuarioSelect.idUsuario!;
                     nombre = usuarioSelect.nombre;
                     apellido = usuarioSelect.apellido;
                     puntos = usuarioSelect.puntos;

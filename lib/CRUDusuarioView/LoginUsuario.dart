@@ -1,4 +1,8 @@
+import 'package:aplicacionpadel/BD/DbUsuario.dart';
+import 'package:aplicacionpadel/model/Usuario.dart';
+import 'package:aplicacionpadel/viewmodel/UsuarioViewModel.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class Loginusuario extends StatefulWidget {
   const Loginusuario({super.key});
@@ -13,9 +17,32 @@ class _LoginusuarioState extends State<Loginusuario> {
   String? nombreUsuario;
   String? contrasena;
 
-  void enviarFormulario() async {
+  void enviarFormulario(BuildContext context) async {
+    final usuarioVM = Provider.of<UsuarioViewModel>(context);
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
+      try {
+        Usuario? usuario =
+            await DbUsuario.getUsuarioLogin(nombreUsuario!, contrasena!);
+        if (usuario != null) {
+          usuarioVM.usuarioActual = usuario;
+          if (context.mounted) {
+            ScaffoldMessenger.of(context)
+                .showSnackBar(const SnackBar(content: Text('Login correcto')));
+          }
+        } else {
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Login incorrecto')));
+          }
+        }
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Error al logear el usuario')),
+          );
+        }
+      }
     }
   }
 
@@ -69,7 +96,7 @@ class _LoginusuarioState extends State<Loginusuario> {
               const SizedBox(height: 20),
               FloatingActionButton(
                 onPressed: () {
-                  enviarFormulario();
+                  enviarFormulario(context);
                 },
                 child: const Icon(Icons.save_outlined),
               )

@@ -20,7 +20,6 @@ class _CrearUsuarioState extends State<CrearUsuario> {
   String? apellido;
   int? edad;
   bool _obscureText = true;
-
   final _formKey = GlobalKey<FormState>(); //clave para el formulario
   String? pickedFilePath; //almacenar url de foto
 
@@ -31,7 +30,6 @@ class _CrearUsuarioState extends State<CrearUsuario> {
       _formKey.currentState!.save(); // Guarda los valores en las variables
 
       Usuario usuario = Usuario(
-          idUsuario: 0,
           nombreUsuario: nombreUsuario!,
           contrasena: contrasena!,
           nombre: nombre!,
@@ -43,18 +41,22 @@ class _CrearUsuarioState extends State<CrearUsuario> {
       try {
         // Intenta insertar el usuario en la base de datos
         await DbUsuario.insert(usuario);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Usuario registrado exitosamente')),
-        );
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Usuario registrado exitosamente')),
+          );
+        }
         // Reiniciar el formulario después de guardar
         _formKey.currentState!.reset();
         setState(() {
           pickedFilePath = null;
         });
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Error al registrar el usuario')),
-        );
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Error al registrar el usuario')),
+          );
+        }
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -172,7 +174,7 @@ class _CrearUsuarioState extends State<CrearUsuario> {
                             final XFile? pickedFile = await picker.pickImage(
                                 source: ImageSource.gallery,
                                 imageQuality:
-                                    100); //imageSource.gallery para galeria y .camera para la camera
+                                    50); //imageSource.gallery para galeria y .camera para la camera
                             if (pickedFile != null) {
                               final bytes = await pickedFile.readAsBytes();
                               setState(() {

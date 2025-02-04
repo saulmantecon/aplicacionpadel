@@ -34,29 +34,25 @@ class ProductImage extends StatelessWidget {
 }
 
 Widget _getImage(String? urlPath) {
-  if (urlPath == null) {
+  if (urlPath == null || urlPath.isEmpty) {
     return const Image(
       image: AssetImage("assets/images/placeholder.png"),
       fit: BoxFit.contain,
     );
   }
 
-  // Verificar si la cadena parece ser Base64
-  if (urlPath.startsWith('/')) {
-    // Asumimos que es una ruta de archivo
-    return Image.file(File(urlPath), fit: BoxFit.contain);
-  } else {
-    try {
-      final bytes = base64Decode(urlPath);
-      return Image.memory(bytes, fit: BoxFit.contain);
-    } catch (e) {
-      return const Image(
-        image: AssetImage("assets/images/placeholder.png"),
-        fit: BoxFit.contain,
-      );
-    }
+  try {
+    final bytes = base64Decode(urlPath);
+    return Image.memory(bytes, fit: BoxFit.contain);
+  } catch (e) {
+    debugPrint("Error al decodificar la imagen: $e");
+    return const Image(
+      image: AssetImage("assets/images/placeholder.png"),
+      fit: BoxFit.contain,
+    );
   }
 }
+
 
 
 BoxDecoration _buildBoxDecoration() {

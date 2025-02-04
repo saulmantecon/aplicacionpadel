@@ -16,8 +16,10 @@ class DbPadel {
         options: OpenDatabaseOptions(
           onCreate: (db, version) {
             // Crear la tabla usuarios cuando la base de datos se crea por primera vez
-            return db.execute(
+            db.execute(
                 "CREATE TABLE usuarios (idUsuario INTEGER PRIMARY KEY AUTOINCREMENT, nombreUsuario TEXT UNIQUE, contrasena TEXT, nombre TEXT, apellido TEXT, edad INTEGER, puntos INTEGER, imagen TEXT)");
+          db.execute(
+                "CREATE TABLE partidos (idPartido INTEGER PRIMARY KEY AUTOINCREMENT, lugar TEXT, fecha TEXT)");
           },
           version: 1, // Establece la versión de la base de datos
         ));
