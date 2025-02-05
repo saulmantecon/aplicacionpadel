@@ -1,10 +1,11 @@
 import 'dart:convert';
+import 'package:aplicacionpadel/model/Partido.dart';
+import 'package:aplicacionpadel/model/Usuario.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-import 'package:aplicacionpadel/model/Partido.dart';
-import 'package:flutter/material.dart';
-import 'dart:convert';
-import 'package:flutter/material.dart';
-import 'package:aplicacionpadel/model/Partido.dart';
+import '../BD/DbPartido.dart';
+import '../viewmodel/PartidoViewModel.dart';
 
 class Containerpartido extends StatefulWidget {
   final Partido partido;
@@ -19,6 +20,7 @@ class _ContainerpartidoState extends State<Containerpartido> {
   final TextEditingController set1Controller = TextEditingController();
   final TextEditingController set2Controller = TextEditingController();
   final TextEditingController set3Controller = TextEditingController();
+
 
   void toggleMostrarResultado(){
     mostrarResultado= !mostrarResultado;
@@ -38,16 +40,10 @@ class _ContainerpartidoState extends State<Containerpartido> {
       if (set3.isNotEmpty) {
         resultado += ", $set3";
       }
-
-
-
-
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Resultado guardado: $resultado")),
       );
-
     }
-
   }
 
   @override
@@ -85,15 +81,15 @@ class _ContainerpartidoState extends State<Containerpartido> {
               children: [
                 Column(
                   children: [
-                    _buildJugador(""),
-                    _buildJugador("Jugador", widget.partido.creador.imagen),
+                    _buildJugador(widget.partido.creador),
+                    _buildJugador(widget.partido.creador),
                   ],
                 ),
                 const Text("VS", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.purple)),
                 Column(
                   children: [
-                    _buildJugador("Jugador", widget.partido.creador.imagen),
-                    _buildJugador("Jugador", widget.partido.creador.imagen),
+                    _buildJugador(widget.partido.creador),
+                    _buildJugador(widget.partido.creador),
                   ],
                 ),
               ],
@@ -170,7 +166,7 @@ class _ContainerpartidoState extends State<Containerpartido> {
     );
   }
 
-  Widget _buildJugador(String nombre, String imagenUsuario) {
+  Widget _buildJugador(Usuario? usuario) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       decoration: BoxDecoration(color: Colors.purple[100], borderRadius: BorderRadius.circular(20)),
@@ -178,11 +174,11 @@ class _ContainerpartidoState extends State<Containerpartido> {
         mainAxisSize: MainAxisSize.min,
         children: [
           CircleAvatar(
-            backgroundImage: widget.partido.creador.imagen.isNotEmpty ? MemoryImage(base64Decode(imagenUsuario)) : const NetworkImage("https://www.l3tcraft.com/wp-content/uploads/2023/01/Knekro.webp") as ImageProvider,
+            backgroundImage: widget.partido.creador.imagen.isNotEmpty ? MemoryImage(base64Decode(usuario!.imagen)) : const NetworkImage("https://www.l3tcraft.com/wp-content/uploads/2023/01/Knekro.webp") as ImageProvider,
             radius: 20,
           ),
           const SizedBox(width: 8),
-          Text(nombre, style: TextStyle(fontWeight: FontWeight.bold, color: Colors.purple[700])),
+          Text(usuario!.nombreUsuario, style: TextStyle(fontWeight: FontWeight.bold, color: Colors.purple[700])),
         ],
       ),
     );

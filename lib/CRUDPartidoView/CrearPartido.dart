@@ -1,5 +1,7 @@
 import 'package:aplicacionpadel/BD/DbPartido.dart';
+import 'package:aplicacionpadel/BD/DbUsuarioPartido.dart';
 import 'package:aplicacionpadel/model/Partido.dart';
+import 'package:aplicacionpadel/model/Usuario_Partido.dart';
 import 'package:aplicacionpadel/util/DateAndTimePicker.dart';
 import 'package:aplicacionpadel/viewmodel/PartidoViewModel.dart';
 import 'package:aplicacionpadel/viewmodel/UsuarioViewModel.dart';
@@ -25,21 +27,28 @@ class _CrearPartidoState extends State<CrearPartido> {
       Partido partido = Partido(
           lugar: _lugarDelPartido!,
           fecha: _fechaHoraSeleccionada!,
+          creador: usuarioVM.usuarioActual!,
           finalizado: false,
           resultado: null);
       try{
-        await DbPartido.insert(partido);
-        ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Partido registrado exitosamente')));
+        int idPartido =await DbPartido.insert(partido);
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Partido $idPartido registrado exitosamente')));
 
         partidoVM.agregarPartido(partido);
 
         _formKey.currentState!.reset();
+
+        Usuario_Partido usuarioPartido = Usuario_Partido(
+            idUsuario: usuarioVM.usuarioActual!.idUsuario!,
+            idPartido: idPartido);
+
+        await DbUsuarioPartido.insert(usuarioPartido);
+
         Navigator.pop(context);
       }catch(e){
         print(e);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Error al registrar el usuario')),
+          const SnackBar(content: Text('Error al registrar el partido')),
         );
       }
     }else{

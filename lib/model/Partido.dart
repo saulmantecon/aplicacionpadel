@@ -1,9 +1,10 @@
-
+import 'package:aplicacionpadel/model/Usuario.dart';
 
 class Partido {
   int? idPartido;
   String lugar;
   String fecha;
+  Usuario creador;
   bool finalizado = false;
   String? resultado;
 
@@ -11,6 +12,7 @@ class Partido {
       {this.idPartido,
       required this.lugar,
       required this.fecha,
+      required this.creador,
       required this.finalizado,
       this.resultado});
 
@@ -19,26 +21,16 @@ class Partido {
       "idPartido": idPartido,
       "lugar": lugar,
       "fecha": fecha,
+      "creador": creador.nombreUsuario,
       "finalizado": bool2Int(finalizado), //false o true
       "resultado": resultado
     };
   }
 
-  // Método para crear un objeto 'partido' desde un Map (de la base de datos)
-  factory Partido.fromMap(Map<String, dynamic> map) {
-    return Partido(
-      idPartido: map['idPartido'],
-      lugar: map["lugar"],
-      fecha: map["fecha"],
-      finalizado: map["finalizado"],
-      resultado: map["resultado"]
-    );
-  }
-
-  int bool2Int(bool bool){
-    int respuesta=0;
-    if(bool){
-      respuesta=1;
+  int bool2Int(bool bool) {
+    int respuesta = 0;
+    if (bool) {
+      respuesta = 1;
     }
     return respuesta;
   }
