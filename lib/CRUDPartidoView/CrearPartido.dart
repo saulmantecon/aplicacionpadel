@@ -22,7 +22,11 @@ class _CrearPartidoState extends State<CrearPartido> {
   void enviarFormulario(PartidoViewModel partidoVM, UsuarioViewModel usuarioVM) async{
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save(); // Guarda los valores en las variables
-      Partido partido = Partido(lugar: _lugarDelPartido!, fecha: _fechaHoraSeleccionada!, creador: usuarioVM.usuarioActual!);
+      Partido partido = Partido(
+          lugar: _lugarDelPartido!,
+          fecha: _fechaHoraSeleccionada!,
+          finalizado: false,
+          resultado: null);
       try{
         await DbPartido.insert(partido);
         ScaffoldMessenger.of(context).showSnackBar(

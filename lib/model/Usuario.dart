@@ -10,7 +10,6 @@ class Usuario {
 
   // Constructor para inicializar los campos
   Usuario({
-
     this.idUsuario,
     required this.nombreUsuario,
     required this.contrasena,

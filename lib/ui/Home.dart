@@ -51,10 +51,11 @@ class _HomeViewState extends State<HomeView> {
   Widget build(BuildContext context) {
     final partidoVM = Provider.of<PartidoViewModel>(context);
     return GridView.builder(
-      gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-        maxCrossAxisExtent: 500,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: MediaQuery.of(context).size.width > 800 ? 2 : 1,
         crossAxisSpacing: 10,
         mainAxisSpacing: 10,
+        mainAxisExtent: 600
       ),
       itemCount: partidoVM.listaPartidos.length,
       itemBuilder: (context, index) {

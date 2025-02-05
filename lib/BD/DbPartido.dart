@@ -1,6 +1,5 @@
 import 'package:aplicacionpadel/model/Partido.dart';
 
-import '../model/Usuario.dart';
 import 'DbPadel.dart';
 
 class DbPartido {
@@ -17,32 +16,16 @@ class DbPartido {
     // Obtener todos los partidos de la base de datos
     final List<Map<String, dynamic>> partidosMap = await db.query("partidos");
 
-    List<Partido> listaPartidos = [];
-
-    for (var partidoMap in partidosMap) {
-      // Obtener el ID del creador
-      int creadorId = partidoMap["creadorId"];
-
-      // Buscar el usuario correspondiente en la tabla `usuarios`
-      final List<Map<String, dynamic>> usuarioMap =
-      await db.query("usuarios", where: "idUsuario = ?", whereArgs: [creadorId]);
-
-      if (usuarioMap.isNotEmpty) {
-        Usuario creador = Usuario.fromMap(usuarioMap.first);
-
-        // Crear el objeto Partido con el creador ya cargado
-        Partido partido = Partido(
-          idPartido: partidoMap["idPartido"],
-          lugar: partidoMap["lugar"],
-          fecha: partidoMap["fecha"],
-          creador: creador, // Pasamos el objeto completo
-        );
-        listaPartidos.add(partido);
-      }
-    }
-    return listaPartidos;
+    return List.generate(
+        partidosMap.length,
+        (i) => Partido(
+            idPartido: partidosMap[i]["idPartido"],
+            lugar: partidosMap[i]["contrasena"],
+            fecha: partidosMap[i]["fecha"],
+            finalizado: partidosMap[i]["finalizado"],
+            resultado: partidosMap[i]["resultado"]),
+    );
   }
-
 
   // Método para eliminar un partido por su id
   static Future<void> delete(int idPartido) async {

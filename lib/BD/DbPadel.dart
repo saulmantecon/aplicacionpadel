@@ -19,7 +19,9 @@ class DbPadel {
             db.execute(
                 "CREATE TABLE usuarios (idUsuario INTEGER PRIMARY KEY AUTOINCREMENT, nombreUsuario TEXT UNIQUE, contrasena TEXT, nombre TEXT, apellido TEXT, edad INTEGER, puntos INTEGER, imagen TEXT)");
           db.execute(
-                "CREATE TABLE partidos (idPartido INTEGER PRIMARY KEY AUTOINCREMENT, lugar TEXT, fecha TEXT, creadorId INTEGER NOT NULL,FOREIGN KEY (creadorId) REFERENCES Usuario(idUsuario) ON DELETE CASCADE)");
+                "CREATE TABLE partidos (idPartido INTEGER PRIMARY KEY AUTOINCREMENT, lugar TEXT, fecha TEXT, finalizado INTEGER, resultado TEXT ");
+
+            db.execute("CREATE TABLE usuariopartidos (idUsuario INTEGER NOT NULL, idPartido INTEGER NOT NULL,resultado TEXT,PRIMARY KEY (idUsuario, idPartido),FOREIGN KEY (idUsuario) REFERENCES usuarios(idUsuario),FOREIGN KEY (idPartido) REFERENCES partidos(idPartido))");
           },
           version: 1, // Establece la versión de la base de datos
         ));
