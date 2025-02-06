@@ -20,7 +20,7 @@ class DbPadel {
                 "CREATE TABLE usuarios (idUsuario INTEGER PRIMARY KEY AUTOINCREMENT, nombreUsuario TEXT UNIQUE, contrasena TEXT, nombre TEXT, apellido TEXT, edad INTEGER, puntos INTEGER, imagen TEXT)"
             );
           db.execute(
-                "CREATE TABLE partidos (idPartido INTEGER PRIMARY KEY AUTOINCREMENT, lugar TEXT, fecha TEXT,creador TEXT unique, finalizado INTEGER, resultado TEXT)"
+                "CREATE TABLE partidos (idPartido INTEGER PRIMARY KEY AUTOINCREMENT, lugar TEXT, fecha TEXT,creador TEXT, finalizado INTEGER, resultado TEXT)"
           );
             db.execute("CREATE TABLE usuariopartidos ("
                 "idUsuario INTEGER NOT NULL,"

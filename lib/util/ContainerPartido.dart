@@ -1,11 +1,12 @@
 import 'dart:convert';
-import 'package:aplicacionpadel/model/Partido.dart';
-import 'package:aplicacionpadel/model/Usuario.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../BD/DbPartido.dart';
+import '../model/Partido.dart';
+import '../model/Usuario.dart';
 import '../viewmodel/PartidoViewModel.dart';
+import '../viewmodel/UsuarioViewModel.dart';
+import 'JugadorNoCreador.dart';
 
 class Containerpartido extends StatefulWidget {
   final Partido partido;
@@ -20,13 +21,31 @@ class _ContainerpartidoState extends State<Containerpartido> {
   final TextEditingController set1Controller = TextEditingController();
   final TextEditingController set2Controller = TextEditingController();
   final TextEditingController set3Controller = TextEditingController();
+  Usuario? creador;
 
-
-  void toggleMostrarResultado(){
-    mostrarResultado= !mostrarResultado;
+  @override
+  void initState() {
+    super.initState();
+    _cargarCreador();
   }
 
-  void guardarResultado() async{
+  // 🔹 Método para obtener el usuario creador desde `PartidoViewModel`
+  Future<void> _cargarCreador() async {
+    final partidoViewModel = Provider.of<PartidoViewModel>(context, listen: false);
+    Usuario? usuario = await partidoViewModel.getCreadorPartido(widget.partido.idPartido!);
+
+    setState(() {
+      creador = usuario;
+    });
+  }
+
+  void toggleMostrarResultado() {
+    setState(() {
+      mostrarResultado = !mostrarResultado;
+    });
+  }
+
+  void guardarResultado() async {
     String set1 = set1Controller.text.trim();
     String set2 = set2Controller.text.trim();
     String set3 = set3Controller.text.trim();
@@ -35,7 +54,7 @@ class _ContainerpartidoState extends State<Containerpartido> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Debes completar al menos 2 sets")),
       );
-    }else{
+    } else {
       String resultado = "$set1, $set2";
       if (set3.isNotEmpty) {
         resultado += ", $set3";
@@ -64,7 +83,7 @@ class _ContainerpartidoState extends State<Containerpartido> {
             ),
           ],
         ),
-        child: Column(
+        child: creador == null ? const Center(child: CircularProgressIndicator()) : Column( // Mostrar carga si el usuario aún no está listo
           mainAxisSize: MainAxisSize.min,
           children: [
             Text("Nº: ${widget.partido.idPartido}"),
@@ -81,15 +100,15 @@ class _ContainerpartidoState extends State<Containerpartido> {
               children: [
                 Column(
                   children: [
-                    _buildJugador(widget.partido.creador),
-                    _buildJugador(widget.partido.creador),
+                    _buildJugadorCreador(creador!),
+                    JugadorNoCreador(),
                   ],
                 ),
                 const Text("VS", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.purple)),
                 Column(
                   children: [
-                    _buildJugador(widget.partido.creador),
-                    _buildJugador(widget.partido.creador),
+                    JugadorNoCreador(),
+                    JugadorNoCreador(),
                   ],
                 ),
               ],
@@ -113,38 +132,61 @@ class _ContainerpartidoState extends State<Containerpartido> {
                 ),
               ),
             ),
-            SizedBox(height: 20,),
-            if (mostrarResultado) _buildResultadoInput(), //cuando pulse el usuario al boton fijarPartido
+            const SizedBox(height: 20),
+            if (mostrarResultado) _buildResultadoInput(),
           ],
         ),
       ),
     );
   }
-  //widget para apuntar el resultado de un partido
+
+  // 🔹 Widget para mostrar el jugador con su imagen
+  Widget _buildJugadorCreador(Usuario usuario) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 70, vertical: 10),
+      decoration: BoxDecoration(color: Colors.purple[100], borderRadius: BorderRadius.circular(20)),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          CircleAvatar(
+            backgroundImage: usuario.imagen.isNotEmpty
+                ? MemoryImage(base64Decode(usuario.imagen))
+                : const NetworkImage("https://www.l3tcraft.com/wp-content/uploads/2023/01/Knekro.webp") as ImageProvider,
+            radius: 20,
+          ),
+          const SizedBox(width: 8),
+          Text(usuario.nombreUsuario, style: TextStyle(fontWeight: FontWeight.bold, color: Colors.purple[700])),
+        ],
+      ),
+    );
+  }
+
+
+  // 🔹 Widget para ingresar el resultado del partido
   Widget _buildResultadoInput() {
     return Column(
       children: [
         Row(
-          spacing: 20,
-          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             _buildSetInput("Set 1", set1Controller),
+            const SizedBox(width: 10),
             _buildSetInput("Set 2", set2Controller),
+            const SizedBox(width: 10),
             _buildSetInput("Set 3 (opcional)", set3Controller)
           ],
         ),
         const SizedBox(height: 10),
         ElevatedButton(
-          onPressed: () {
-            guardarResultado();
-          },
+          onPressed: guardarResultado,
           style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
           child: const Text("Guardar Resultado"),
         ),
       ],
     );
   }
-  //widget de los sets de los partidos
+
+  // 🔹 Widget para ingresar un set
   Widget _buildSetInput(String label, TextEditingController controller) {
     return Column(
       children: [
@@ -163,24 +205,6 @@ class _ContainerpartidoState extends State<Containerpartido> {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildJugador(Usuario? usuario) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-      decoration: BoxDecoration(color: Colors.purple[100], borderRadius: BorderRadius.circular(20)),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          CircleAvatar(
-            backgroundImage: widget.partido.creador.imagen.isNotEmpty ? MemoryImage(base64Decode(usuario!.imagen)) : const NetworkImage("https://www.l3tcraft.com/wp-content/uploads/2023/01/Knekro.webp") as ImageProvider,
-            radius: 20,
-          ),
-          const SizedBox(width: 8),
-          Text(usuario!.nombreUsuario, style: TextStyle(fontWeight: FontWeight.bold, color: Colors.purple[700])),
-        ],
-      ),
     );
   }
 }

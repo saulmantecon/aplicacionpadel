@@ -22,10 +22,10 @@ class DbPartido {
         partidosMap.length,
         (i) => Partido(
             idPartido: partidosMap[i]["idPartido"],
-            lugar: partidosMap[i]["contrasena"],
+            lugar: partidosMap[i]["lugar"],
             fecha: partidosMap[i]["fecha"],
             creador: partidosMap[i]["creador"],
-            finalizado: partidosMap[i]["finalizado"],
+            finalizado: (partidosMap[i]["finalizado"] ?? 0) == 1, //si es 0 devuelve false y si es 1 true
             resultado: partidosMap[i]["resultado"]),
     );
   }

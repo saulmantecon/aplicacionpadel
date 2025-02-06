@@ -4,7 +4,7 @@ class Partido {
   int? idPartido;
   String lugar;
   String fecha;
-  Usuario creador;
+  String creador;
   bool finalizado = false;
   String? resultado;
 
@@ -21,18 +21,10 @@ class Partido {
       "idPartido": idPartido,
       "lugar": lugar,
       "fecha": fecha,
-      "creador": creador.nombreUsuario,
-      "finalizado": bool2Int(finalizado), //false o true
+      "creador": creador,
+      "finalizado": finalizado, //false o true
       "resultado": resultado
     };
-  }
-
-  int bool2Int(bool bool) {
-    int respuesta = 0;
-    if (bool) {
-      respuesta = 1;
-    }
-    return respuesta;
   }
 
   @override
