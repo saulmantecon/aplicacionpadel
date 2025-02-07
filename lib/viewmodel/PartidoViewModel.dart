@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 
 class PartidoViewModel extends ChangeNotifier{
   List<Partido> listaPartidos = [];
-  List<Map<String, dynamic>> listapartidosCreador = [];
 
   void cargarPartidos() async{
     listaPartidos = await DbPartido.partidos();
@@ -15,6 +14,15 @@ class PartidoViewModel extends ChangeNotifier{
   void agregarPartido(Partido partido) {
     listaPartidos.add(partido);
     notifyListeners(); // Notifica a los widgets para que se redibujen
+  }
+  void marcarPartidoComoFinalizado(int idPartido) {
+    for (var partido in listaPartidos) {
+      if (partido.idPartido == idPartido) {
+        partido.finalizado = true;
+        notifyListeners();
+        break;
+      }
+    }
   }
 
 
