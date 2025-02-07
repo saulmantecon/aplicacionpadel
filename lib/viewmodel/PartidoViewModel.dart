@@ -17,13 +17,5 @@ class PartidoViewModel extends ChangeNotifier{
     notifyListeners(); // Notifica a los widgets para que se redibujen
   }
 
-  Future<Usuario?> getCreadorPartido(int idPartido)async{
-    Usuario? usuario= await DbPartido.obtenerUsuarioCreadorPartido(idPartido);
-    if(usuario!=null){
-      return usuario;
-    }else{
-      return null;
-    }
-  }
 
 }

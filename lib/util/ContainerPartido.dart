@@ -1,12 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 import '../model/Partido.dart';
 import '../model/Usuario.dart';
 import '../viewmodel/PartidoViewModel.dart';
-import '../viewmodel/UsuarioViewModel.dart';
-import 'JugadorNoCreador.dart';
 
 class Containerpartido extends StatefulWidget {
   final Partido partido;
@@ -21,23 +18,10 @@ class _ContainerpartidoState extends State<Containerpartido> {
   final TextEditingController set1Controller = TextEditingController();
   final TextEditingController set2Controller = TextEditingController();
   final TextEditingController set3Controller = TextEditingController();
-  Usuario? creador;
 
-  @override
-  void initState() {
-    super.initState();
-    _cargarCreador();
-  }
-
-  // 🔹 Método para obtener el usuario creador desde `PartidoViewModel`
-  Future<void> _cargarCreador() async {
-    final partidoViewModel = Provider.of<PartidoViewModel>(context, listen: false);
-    Usuario? usuario = await partidoViewModel.getCreadorPartido(widget.partido.idPartido!);
-
-    setState(() {
-      creador = usuario;
-    });
-  }
+  Usuario? usuario2;
+  Usuario? usuario3;
+  Usuario? usuario4;
 
   void toggleMostrarResultado() {
     setState(() {
@@ -83,7 +67,7 @@ class _ContainerpartidoState extends State<Containerpartido> {
             ),
           ],
         ),
-        child: creador == null ? const Center(child: CircularProgressIndicator()) : Column( // Mostrar carga si el usuario aún no está listo
+        child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text("Nº: ${widget.partido.idPartido}"),
@@ -100,15 +84,15 @@ class _ContainerpartidoState extends State<Containerpartido> {
               children: [
                 Column(
                   children: [
-                    _buildJugadorCreador(creador!),
-                    JugadorNoCreador(),
+                    _buildJugadorCreador(widget.partido.creador),
+                    buildJugadorDropdown(),
                   ],
                 ),
                 const Text("VS", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.purple)),
                 Column(
                   children: [
-                    JugadorNoCreador(),
-                    JugadorNoCreador(),
+                    buildJugadorDropdown(),
+                    buildJugadorDropdown(),
                   ],
                 ),
               ],
@@ -140,7 +124,7 @@ class _ContainerpartidoState extends State<Containerpartido> {
     );
   }
 
-  // 🔹 Widget para mostrar el jugador con su imagen
+  // Widget para mostrar el jugador con su imagen
   Widget _buildJugadorCreador(Usuario usuario) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 70, vertical: 10),
@@ -161,6 +145,58 @@ class _ContainerpartidoState extends State<Containerpartido> {
     );
   }
 
+  // 🔹 Widget para mostrar el dropdown de jugador con su imagen
+  Widget buildJugadorDropdown() {
+    List<Usuario> usuarios = [usuario2!, usuario3!, usuario4!]; // Asumiendo que estos usuarios son inicializados
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.purple[100],
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          CircleAvatar(
+            backgroundImage: usuario2?.imagen.isNotEmpty == true
+                ? MemoryImage(base64Decode(usuario2!.imagen))
+                : const NetworkImage("https://www.l3tcraft.com/wp-content/uploads/2023/01/Knekro.webp") as ImageProvider,
+            radius: 20,
+          ),
+          const SizedBox(width: 8),
+          DropdownButton<Usuario>(
+            value: usuario2, // Valor seleccionado
+            onChanged: (Usuario? nuevoUsuario) {
+              if (nuevoUsuario != null) {
+                setState(() {
+                  usuario2 = nuevoUsuario; // Actualizamos el usuario seleccionado
+                });
+              }
+            },
+            underline: const SizedBox(),
+            items: usuarios.map<DropdownMenuItem<Usuario>>((Usuario usuario) {
+              return DropdownMenuItem<Usuario>(
+                value: usuario,
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      backgroundImage: usuario.imagen.isNotEmpty
+                          ? MemoryImage(base64Decode(usuario.imagen))
+                          : const NetworkImage("https://www.l3tcraft.com/wp-content/uploads/2023/01/Knekro.webp") as ImageProvider,
+                      radius: 15,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(usuario.nombreUsuario, style: TextStyle(fontWeight: FontWeight.bold, color: Colors.purple[700])),
+                  ],
+                ),
+              );
+            }).toList(),
+          ),
+        ],
+      ),
+    );
+  }
 
   // 🔹 Widget para ingresar el resultado del partido
   Widget _buildResultadoInput() {

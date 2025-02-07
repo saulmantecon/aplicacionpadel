@@ -11,24 +11,38 @@ class DbPartido {
     return id;
   } //insert
 
-  // Método para obtener los partidos de la base de datos
   static Future<List<Partido>> partidos() async {
     final db = await DbPadel.openDB();
 
     // Obtener todos los partidos de la base de datos
     final List<Map<String, dynamic>> partidosMap = await db.query("partidos");
 
-    return List.generate(
-        partidosMap.length,
-        (i) => Partido(
-            idPartido: partidosMap[i]["idPartido"],
-            lugar: partidosMap[i]["lugar"],
-            fecha: partidosMap[i]["fecha"],
-            creador: partidosMap[i]["creador"],
-            finalizado: (partidosMap[i]["finalizado"] ?? 0) == 1, //si es 0 devuelve false y si es 1 true
-            resultado: partidosMap[i]["resultado"]),
-    );
+    List<Partido> partidos = [];
+
+    for (var partidoData in partidosMap) {
+      // 🔹 Buscar el usuario en la tabla usuarios usando el nombreUsuario
+      List<Map<String, dynamic>> usuarioMap = await db.query(
+        "usuarios",
+        where: "nombreUsuario = ?",
+        whereArgs: [partidoData["creador"]],
+      );
+
+      Usuario creador = Usuario.fromMap(usuarioMap.first);
+
+      // 🔹 Crear el objeto Partido con el usuario recuperado
+      partidos.add(Partido(
+        idPartido: partidoData["idPartido"],
+        lugar: partidoData["lugar"],
+        fecha: partidoData["fecha"],
+        creador: creador, // Aquí asignamos el objeto Usuario
+        finalizado: (partidoData["finalizado"] ?? 0) == 1,
+        resultado: partidoData["resultado"],
+      ));
+    }
+
+    return partidos;
   }
+
 
   // Método para eliminar un partido por su id
   static Future<void> delete(int idPartido) async {
@@ -46,35 +60,6 @@ class DbPartido {
       whereArgs: [partido.idPartido],
     );
   } //update
-
-  static Future<Usuario?> obtenerUsuarioCreadorPartido(int idPartido) async {
-    final db = await DbPadel.openDB();
-
-    List<Map<String, dynamic>> resultado = await db.rawQuery(
-        '''
-    SELECT u.* 
-    FROM partidos p
-    JOIN usuarios u ON p.creador = u.nombreUsuario
-    WHERE p.idPartido = ?
-    ''',
-        [idPartido]
-    );
-
-    if (resultado.isNotEmpty){
-      return Usuario(
-        nombreUsuario: resultado[0]["nombreUsuario"],
-        contrasena: resultado[0]["contrasena"],
-        idUsuario: resultado[0]["idUsuario"],
-        nombre: resultado[0]["nombre"],
-        apellido: resultado[0]["apellido"],
-        edad: resultado[0]["edad"],
-        puntos: resultado[0]["puntos"],
-        imagen: resultado[0]["imagen"],
-      );
-    }else{
-      return null;
-    }
-  }
 
 
 

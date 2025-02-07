@@ -27,7 +27,7 @@ class _CrearPartidoState extends State<CrearPartido> {
       Partido partido = Partido(
           lugar: _lugarDelPartido!,
           fecha: _fechaHoraSeleccionada!,
-          creador: usuarioVM.usuarioActual!.nombreUsuario,
+          creador: usuarioVM.usuarioActual!,
           finalizado: false,
           resultado: null);
       try{
