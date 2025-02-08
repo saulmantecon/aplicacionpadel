@@ -9,6 +9,7 @@ import '../model/Usuario.dart';
 import '../viewmodel/UsuarioViewModel.dart';
 
 class Containerpartido extends StatefulWidget {
+
   final Partido partido;
 
   const Containerpartido({super.key, required this.partido});
@@ -42,23 +43,24 @@ class _ContainerpartidoState extends State<Containerpartido> {
       }
     });
   }
-
+  /// Actualiza la lista de usuarios disponibles para el partido.
   void actualizarUsuariosDisponibles() {
-    setState(() {
-      final usuarioVM = Provider.of<UsuarioViewModel>(context, listen: false);
-      usuariosFiltrados = usuarioVM.listaUsuarios.where((usuario) {
-        return usuario != usuario2 &&
-            usuario != usuario3 &&
-            usuario != usuario4;
-      }).toList();
+    Future.delayed(Duration(milliseconds: 50), () {
+      setState(() {
+        final usuarioVM = Provider.of<UsuarioViewModel>(context, listen: false);
+        usuariosFiltrados = usuarioVM.listaUsuarios.where((usuario) {
+          return usuario != usuario2 && usuario != usuario3 && usuario != usuario4;
+        }).toList();
+      });
     });
   }
-  //fijarPartido
+
+  /// Asigna jugadores al partido y los registra en la base de datos.
   void asignarJugadoresAPartido()async{
     if(usuario2!=null && usuario3!=null && usuario4!=null ){
-      Usuario_Partido usuario2_partido = Usuario_Partido(idUsuario: usuario2!.idUsuario!, idPartido: widget.partido.idPartido!);
-      Usuario_Partido usuario3_partido = Usuario_Partido(idUsuario: usuario3!.idUsuario!, idPartido: widget.partido.idPartido!);
-      Usuario_Partido usuario4_partido = Usuario_Partido(idUsuario: usuario4!.idUsuario!, idPartido: widget.partido.idPartido!);
+      Usuario_Partido usuario2_partido = Usuario_Partido(idUsuario: usuario2!.idUsuario!, idPartido: widget.partido.idPartido!, equipo: 1);
+      Usuario_Partido usuario3_partido = Usuario_Partido(idUsuario: usuario3!.idUsuario!, idPartido: widget.partido.idPartido!, equipo: 2);
+      Usuario_Partido usuario4_partido = Usuario_Partido(idUsuario: usuario4!.idUsuario!, idPartido: widget.partido.idPartido!, equipo: 2);
 
       try{
         await DbUsuarioPartido.insert(usuario2_partido);
@@ -77,41 +79,6 @@ class _ContainerpartidoState extends State<Containerpartido> {
       print("hay algun usuario null");
     }
   }//asignarJugadoresAPartido
-
-
-  List<int> determinarGanador(String resultado, int idJugador1, int idJugador2, int idJugador3, int idJugador4) {
-    List<String> sets = resultado.split(","); //Divide el string en sets individuales
-    int setsGanadosEquipo1 = 0;
-    int setsGanadosEquipo2 = 0;
-
-    for (String set in sets) {
-      List<String> puntuaciones = set.trim().split("-"); // 🔹 Divide los números
-      if (puntuaciones.length == 2) {
-        int puntosEquipo1 = int.parse(puntuaciones[0]); // 🔹 Puntos del equipo 1 (Jugador 1 y 2)
-        int puntosEquipo2 = int.parse(puntuaciones[1]); // 🔹 Puntos del equipo 2 (Jugador 3 y 4)
-
-        if (puntosEquipo1 > puntosEquipo2) {
-          setsGanadosEquipo1++; // Equipo 1 gana este set
-        } else {
-          setsGanadosEquipo2++; // Equipo 2 gana este set
-        }
-
-        // 🔹 Si un equipo gana 2 sets, ya es el ganador
-        if (setsGanadosEquipo1 == 2) {
-          return [idJugador1, idJugador2]; //  Gana equipo 1
-        } else if (setsGanadosEquipo2 == 2) {
-          return [idJugador3, idJugador4]; // Gana equipo 2
-        }
-      }
-    }
-
-    //Si el partido llegó hasta el tercer set, el equipo con más sets ganados es el ganador
-    return (setsGanadosEquipo1 > setsGanadosEquipo2) ? [idJugador1, idJugador2] : [idJugador3, idJugador4];
-  }
-
-
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -158,6 +125,7 @@ class _ContainerpartidoState extends State<Containerpartido> {
                   Column(
                     children: [
                       _buildJugadorCreador(widget.partido.creador),
+                      const SizedBox(height: 5,),
                       buildJugadorDropdown(2, esCreador),
                     ],
                   ),
@@ -169,11 +137,13 @@ class _ContainerpartidoState extends State<Containerpartido> {
                   Column(
                     children: [
                       buildJugadorDropdown(3, esCreador),
+                      const SizedBox(height: 5,),
                       buildJugadorDropdown(4, esCreador),
                     ],
                   ),
                 ],
               ),
+              //si se cumplen las validaciones aparece el boton de fijar partido
               if (esCreador && usuario2!=null && usuario3!=null && usuario4!=null)
                 ElevatedButton(
                   onPressed: () => asignarJugadoresAPartido(),
@@ -189,6 +159,7 @@ class _ContainerpartidoState extends State<Containerpartido> {
                   ),
                 ),
               const SizedBox(height: 10),
+              //cuando se pulsa a fijar partido aparecen 3 textield y un boton para finalizar el partido
               if (mostrarResultado)
                 Column(
                   children: [
@@ -209,13 +180,8 @@ class _ContainerpartidoState extends State<Containerpartido> {
                           );
                         }else{
                           String resultado = "${set1Controller.text}, ${set2Controller.text}, ${set3Controller.text}";
-                          List<int> ganadores = determinarGanador(
-                              resultado, widget.partido.creador.idUsuario!,
-                              usuario2!.idUsuario!,
-                              usuario3!.idUsuario!,
-                              usuario4!.idUsuario!);
                           try{
-                            partidoVM.finalizarPartido(widget.partido.idPartido!, resultado, ganadores[0], ganadores[1]);
+                            partidoVM.finalizarPartido(widget.partido.idPartido!, resultado);
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(content: Text("Partido finalizado correctamente")),);
                           }catch(e){
@@ -224,7 +190,6 @@ class _ContainerpartidoState extends State<Containerpartido> {
                               const SnackBar(content: Text("error al finalizar el partido.")),);
                           }
                         }
-
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green,
@@ -245,8 +210,10 @@ class _ContainerpartidoState extends State<Containerpartido> {
       ),
     );
   }
-
-  Widget _buildJugadorCreador(Usuario usuario) {
+    /// Construye un widget que muestra la información del creador del partido.
+    ///
+    /// Este widget incluye un avatar y el nombre del usuario en un contenedor con estilo.
+    Widget _buildJugadorCreador(Usuario usuario) {
     return SizedBox(
       width: 200, //Tamaño uniforme para evitar desbordamientos
       child: Container(
@@ -282,6 +249,10 @@ class _ContainerpartidoState extends State<Containerpartido> {
     );
   }
 
+  /// Construye un widget que muestra un menú desplegable para seleccionar jugadores.
+  ///
+  /// Este widget permite seleccionar un jugador disponible para el partido,
+  /// asegurando que el mismo jugador no sea asignado dos veces.
   Widget buildJugadorDropdown(int numeroJugador, bool esCreador) {
     Usuario? usuarioSeleccionado;
 
@@ -300,106 +271,67 @@ class _ContainerpartidoState extends State<Containerpartido> {
       }
     }
 
-    if (esCreador) {
-      return Container(
-        width: 200,
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-        decoration: BoxDecoration(
-          color: Colors.purple[100],
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Row(
-          children: [
-            CircleAvatar(
-              backgroundImage: usuarioSeleccionado?.imagen.isNotEmpty == true
-                  ? MemoryImage(base64Decode(usuarioSeleccionado!.imagen))
-                  : const NetworkImage(
-                          "https://www.l3tcraft.com/wp-content/uploads/2023/01/Knekro.webp")
-                      as ImageProvider,
-              radius: 20,
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: IgnorePointer(
-                ignoring: mostrarResultado,
-                child: DropdownButton<Usuario>(
-                  isExpanded: true,
-                  value: opcionesFiltradas.contains(usuarioSeleccionado) ? usuarioSeleccionado : null,
-                  hint: const Text("Selecciona un jugador"),
-                  onChanged: (Usuario? nuevoUsuario) {
-                    if (nuevoUsuario != null) {
-                      setState(() {
-                        if (numeroJugador == 2) usuario2 = nuevoUsuario;
-                        if (numeroJugador == 3) usuario3 = nuevoUsuario;
-                        if (numeroJugador == 4) usuario4 = nuevoUsuario;
-                        actualizarUsuariosDisponibles();
-                      });
-                    }
-                  },
-                  underline: const SizedBox(),
-                  items: opcionesFiltradas.map((Usuario usuario) {
-                    return DropdownMenuItem<Usuario>(
-                      value: usuario,
-                      child: Row(
-                        children: [
-                          CircleAvatar(
-                            backgroundImage: usuario.imagen.isNotEmpty
-                                ? MemoryImage(base64Decode(usuario.imagen))
-                                : const NetworkImage(
-                                        "https://www.l3tcraft.com/wp-content/uploads/2023/01/Knekro.webp")
-                                    as ImageProvider,
-                            radius: 15,
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              usuario.nombreUsuario,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.purple[700]),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
-    } else {
-      return Container(
-        width: 200,
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-        decoration: BoxDecoration(
-          color: Colors.purple[100],
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Row(
-          children: [
-            CircleAvatar(
-              backgroundImage: usuarioSeleccionado?.imagen.isNotEmpty == true ? MemoryImage(base64Decode(usuarioSeleccionado!.imagen)) : const NetworkImage(
-                          "https://www.l3tcraft.com/wp-content/uploads/2023/01/Knekro.webp") as ImageProvider,
-              radius: 20,
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(usuarioSeleccionado != null ? usuarioSeleccionado.nombreUsuario : "No asignado",
-                style: TextStyle(
-                    fontWeight: FontWeight.bold, color: Colors.purple[700]),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ],
-        ),
-      );
+    // Asegurarse de que el usuario seleccionado esté en las opciones
+    if (usuarioSeleccionado != null && !opcionesFiltradas.contains(usuarioSeleccionado)) {
+      opcionesFiltradas.add(usuarioSeleccionado);
     }
+    return Container(
+      width: 200,
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.purple[100],
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: IgnorePointer(
+        ignoring: mostrarResultado,
+        child: DropdownButton<Usuario>(
+          isExpanded: true,
+          value: usuarioSeleccionado,
+          hint: const Text("Selecciona un jugador"),
+          onChanged: (Usuario? nuevoUsuario) {
+            if (nuevoUsuario != null) {
+              setState(() {
+                if (numeroJugador == 2) usuario2 = nuevoUsuario;
+                if (numeroJugador == 3) usuario3 = nuevoUsuario;
+                if (numeroJugador == 4) usuario4 = nuevoUsuario;
+                actualizarUsuariosDisponibles();
+              });
+            }
+          },
+          underline: const SizedBox(),
+          items: opcionesFiltradas.map((Usuario usuario) {
+            return DropdownMenuItem<Usuario>(
+              value: usuario,
+              child: Row(
+                children: [
+                  CircleAvatar(
+                    backgroundImage: usuario.imagen.isNotEmpty
+                        ? MemoryImage(base64Decode(usuario.imagen))
+                        : const NetworkImage(
+                        "https://www.l3tcraft.com/wp-content/uploads/2023/01/Knekro.webp")
+                    as ImageProvider,
+                    radius: 15,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    usuario.nombreUsuario,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.purple[700],
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }).toList(),
+        ),
+      ),
+    );
   }
 
-  //WIDGET PARA CREAR CADA TEXTFORMFIELD (SET)
+
+  ///Widget para crear los textformfields de los sets.
   Widget _buildSetInput(String label, TextEditingController controller) {
     return Column(
       children: [

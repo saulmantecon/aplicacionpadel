@@ -5,6 +5,8 @@ import 'package:aplicacionpadel/util/ProductImage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
+
+///Clase que representa la pantalla para crear un usuario.
 class CrearUsuario extends StatefulWidget {
   const CrearUsuario({super.key});
 
@@ -22,6 +24,11 @@ class _CrearUsuarioState extends State<CrearUsuario> {
   final _formKey = GlobalKey<FormState>(); //clave para el formulario
   String? pickedFilePath; //almacenar url de foto
 
+
+  /// Valida el formulario y registra un nuevo usuario en la base de datos.
+  ///
+  /// - Si la validación es exitosa, se guarda el usuario y se muestra un mensaje de éxito.
+  /// - En caso de error, se muestra un mensaje informativo en la interfaz.
   void enviarFormulario() async {
     if (_formKey.currentState!.validate() &&
         pickedFilePath != null &&
@@ -40,6 +47,7 @@ class _CrearUsuarioState extends State<CrearUsuario> {
       try {
         // Intenta insertar el usuario en la base de datos
         await DbUsuario.insert(usuario);
+
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Usuario registrado exitosamente')),
@@ -72,6 +80,7 @@ class _CrearUsuarioState extends State<CrearUsuario> {
           width: 600,
           child: Column(
             children: [
+              /// TextFormfield para el nombre de usuario.
               TextFormField(
                 decoration: const InputDecoration(
                     labelText: "Introduce un nombre de usuario",
@@ -86,6 +95,7 @@ class _CrearUsuarioState extends State<CrearUsuario> {
                   nombreUsuario = value;
                 },
               ),
+              ///Textformfield para la contraseña con opción de visualización.
               TextFormField(
                 obscureText: _obscureText,
                 // Esto oculta el texto ingresado (se muestra como puntos o asteriscos)
@@ -112,6 +122,7 @@ class _CrearUsuarioState extends State<CrearUsuario> {
                 },
                 onSaved: (value) => contrasena = value,
               ),
+              /// TextformField para el nombre del usuario.
               TextFormField(
                 decoration: const InputDecoration(
                     labelText: "Introduce un nombre", hintText: "Nombre"),
@@ -125,6 +136,7 @@ class _CrearUsuarioState extends State<CrearUsuario> {
                   nombre = value;
                 },
               ),
+              /// TextformField para el apellido del usuario.
               TextFormField(
                 decoration: const InputDecoration(
                     labelText: "Introduce tu apellido", hintText: "Apellido"),
@@ -138,6 +150,7 @@ class _CrearUsuarioState extends State<CrearUsuario> {
                   apellido = value;
                 },
               ),
+              /// TextformField para la edad del usuario.
               TextFormField(
                 decoration: const InputDecoration(
                     labelText: "Introduce tu edad", hintText: "Edad"),
@@ -152,18 +165,10 @@ class _CrearUsuarioState extends State<CrearUsuario> {
                       0; // Aquí intentamos parsear a int, y si no es válido, asignamos 0
                 },
               ),
+              ///Stack donde se podrá introducir una imagen de perfil de usuario.
               Stack(
                 children: [
                   ProductImage(urlPath: pickedFilePath),
-                  /*Positioned(
-                  top: 60,
-                  left: 20,
-                  child: IconButton(
-                      onPressed: () {},
-                      icon: const Icon(Icons.arrow_back_ios_new),
-                      color: Colors.black)
-              ),
-               */
                   Positioned(
                       top: 50,
                       right: 25,
@@ -183,10 +188,12 @@ class _CrearUsuarioState extends State<CrearUsuario> {
                             }
                           },
                           icon: const Icon(Icons.camera_alt_outlined),
-                          color: Colors.black))
+                          color: Colors.black)
+                  )
                 ],
               ),
               const SizedBox(height: 100),
+              /// FloatingActionButton para enviar el formulario y registrar el usuario.
               FloatingActionButton(
                 onPressed: () {
                   enviarFormulario();

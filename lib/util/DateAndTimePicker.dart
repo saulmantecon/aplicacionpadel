@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+///Widget personalizado para mostrar Un DatePicker y un Datetime (fecha y hora).
 class DateAndTimePicker extends FormField<DateTime> {
   DateAndTimePicker({super.key, required FormFieldSetter<DateTime> onSaved})
       : super(

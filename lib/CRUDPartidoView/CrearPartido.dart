@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
+/// Esta clase representa la pantalla para la creación de un partido.
 class CrearPartido extends StatefulWidget {
   const CrearPartido({super.key});
 
@@ -21,6 +22,11 @@ class _CrearPartidoState extends State<CrearPartido> {
   String? _lugarDelPartido;
   String? _fechaHoraSeleccionada;
 
+
+  /// Valida el formulario y registra un nuevo partido en la base de datos.
+  ///
+  /// - Si la validación es exitosa, se guarda el partido y se notifica al usuario.
+  /// - En caso de error, se muestra un mensaje de error en la interfaz.
   void enviarFormulario(PartidoViewModel partidoVM, UsuarioViewModel usuarioVM) async{
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save(); // Guarda los valores en las variables
@@ -33,6 +39,7 @@ class _CrearPartidoState extends State<CrearPartido> {
       try{
         int idPartido =await DbPartido.insert(partido);
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Partido $idPartido registrado exitosamente')));
+        partido.idPartido=idPartido;
 
         partidoVM.agregarPartido(partido);
 
@@ -40,7 +47,8 @@ class _CrearPartidoState extends State<CrearPartido> {
 
         Usuario_Partido usuarioPartido = Usuario_Partido(
             idUsuario: usuarioVM.usuarioActual!.idUsuario!,
-            idPartido: idPartido);
+            idPartido: idPartido,
+            equipo: 1);
 
         await DbUsuarioPartido.insert(usuarioPartido);
 

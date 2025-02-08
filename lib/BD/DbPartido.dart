@@ -1,26 +1,31 @@
 import 'package:aplicacionpadel/model/Partido.dart';
 import 'package:aplicacionpadel/model/Usuario.dart';
-
 import 'DbPadel.dart';
 
+/// Clase para manejar los partidos en la base de datos.
 class DbPartido {
-  // Método para insertar un partido en la base de datos
+  /// Inserta un partido en la base de datos.
+  ///
+  /// Retorna el ID del partido insertado.
   static Future<int> insert(Partido partido) async {
     final db = await DbPadel.openDB();
-    int id =await db.insert("partidos", partido.toMap());
+    int id = await db.insert("partidos", partido.toMap());
     return id;
-  } //insert
+  }
 
+  /// Obtiene todos los partidos de la base de datos.
+  ///
+  /// Retorna una lista de objetos `Partido`, cada uno con su creador asociado.
   static Future<List<Partido>> partidos() async {
     final db = await DbPadel.openDB();
 
-    // Obtener todos los partidos de la base de datos
+    // Consulta para obtener todos los partidos.
     final List<Map<String, dynamic>> partidosMap = await db.query("partidos");
 
     List<Partido> partidos = [];
 
     for (var partidoData in partidosMap) {
-      // 🔹 Buscar el usuario en la tabla usuarios usando el nombreUsuario
+      // Busca el usuario creador del partido en la tabla `usuarios`.
       List<Map<String, dynamic>> usuarioMap = await db.query(
         "usuarios",
         where: "nombreUsuario = ?",
@@ -29,42 +34,34 @@ class DbPartido {
 
       Usuario creador = Usuario.fromMap(usuarioMap.first);
 
-      // 🔹 Crear el objeto Partido con el usuario recuperado
+      // Crea el objeto Partido con el usuario recuperado.
       partidos.add(Partido(
         idPartido: partidoData["idPartido"],
         lugar: partidoData["lugar"],
         fecha: partidoData["fecha"],
-        creador: creador, // Aquí asignamos el objeto Usuario
+        creador: creador,
         finalizado: (partidoData["finalizado"] ?? 0) == 1,
         resultado: partidoData["resultado"],
       ));
     }
-
     return partidos;
   }
 
-
-  // Método para eliminar un partido por su id
+  /// Elimina un partido de la base de datos por su ID.
   static Future<void> delete(int idPartido) async {
     final db = await DbPadel.openDB();
     await db.delete("partidos", where: "idPartido = ?", whereArgs: [idPartido]);
-  } //delete
+  }
 
-  // Método para actualizar un partido
-  static Future<void> update(Partido partido) async {
-    final db = await DbPadel.openDB();
-    await db.update(
-      "partidos",
-      partido.toMap(),
-      where: "idPartido = ?",
-      whereArgs: [partido.idPartido],
-    );
-  } //update
-
-  static Future<void> finalizarPartido(int idPartido, String resultado, int idGanador1, int idGanador2) async {
+  /// Marca un partido como finalizado y actualiza los puntos de los ganadores.
+  ///
+  /// Actualiza el campo `finalizado` y agrega el resultado del partido.
+  /// Suma 3 puntos a los dos jugadores ganadores.
+  static Future<void> finalizarPartido(
+      int idPartido, String resultado, int idGanador1, int idGanador2) async {
     final db = await DbPadel.openDB();
 
-    // 🔹 1. Actualizar el partido en la base de datos con el resultado
+    // Actualiza el estado del partido.
     await db.update(
       "partidos",
       {"finalizado": 1, "resultado": resultado},
@@ -72,9 +69,26 @@ class DbPartido {
       whereArgs: [idPartido],
     );
 
-    // 🔹 2. Sumar 3 puntos a los dos jugadores del equipo ganador
-    await db.rawUpdate("UPDATE usuarios SET puntos = puntos + 3 WHERE idUsuario = ?", [idGanador1]);
-    await db.rawUpdate("UPDATE usuarios SET puntos = puntos + 3 WHERE idUsuario = ?", [idGanador2]);
+    // Suma puntos a los ganadores.
+    await db.rawUpdate(
+        "UPDATE usuarios SET puntos = puntos + 3 WHERE idUsuario = ?", [idGanador1]);
+    await db.rawUpdate(
+        "UPDATE usuarios SET puntos = puntos + 3 WHERE idUsuario = ?", [idGanador2]);
+  }
+
+  /// Obtiene los IDs de los jugadores de un equipo en un partido.
+  ///
+  /// Recibe el ID del partido y el número del equipo.
+  /// Retorna una lista con los IDs de los jugadores.
+  static Future<List<int>> obtenerJugadoresPorEquipo(
+      int idPartido, int equipo) async {
+    final db = await DbPadel.openDB();
+    final resultados = await db.query(
+      "usuariopartidos",
+      columns: ["idUsuario"],
+      where: "idPartido = ? AND equipo = ?",
+      whereArgs: [idPartido, equipo],
+    );
+    return resultados.map((fila) => fila["idUsuario"] as int).toList();
   }
 }
-

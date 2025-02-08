@@ -1,8 +1,8 @@
 import 'dart:convert';
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 
+
+///Widget que sirve para poder seleccionar una imagen de la galería.
 class ProductImage extends StatelessWidget {
   final String? urlPath;
 

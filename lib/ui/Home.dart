@@ -3,8 +3,8 @@ import 'package:aplicacionpadel/util/ContainerPartido.dart';
 import 'package:aplicacionpadel/viewmodel/PartidoViewModel.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../CRUDPartidoView/CrearPartido.dart';
 
+///Clase que representa la pantalla de inicio.
 class Home extends StatelessWidget {
   const Home({super.key});
 
@@ -27,7 +27,7 @@ class Home extends StatelessWidget {
   }
 }
 
-//////////////////////////////////////////
+/// Clase que muestra la lista de partidos no finalizados.
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
 
@@ -52,20 +52,16 @@ class _HomeViewState extends State<HomeView> {
     final partidoVM = Provider.of<PartidoViewModel>(context);
 
     //Filtrar partidos NO finalizados
-    List<Partido> partidosNoFinalizados = partidoVM.listaPartidos.where((
-        partido) => !partido.finalizado).toList();
+    List<Partido> partidosNoFinalizados = partidoVM.listaPartidos.where((partido) => !partido.finalizado).toList();
 
     return GridView.builder(
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: MediaQuery
-              .of(context)
-              .size
-              .width > 800 ? 2 : 1,
+          crossAxisCount: MediaQuery.of(context).size.width > 800 ? 2 : 1,
           crossAxisSpacing: 10,
           mainAxisSpacing: 10,
           mainAxisExtent: 600
       ),
-      itemCount: partidosNoFinalizados.length, // 🔹 Solo partidos activos
+      itemCount: partidosNoFinalizados.length,
       itemBuilder: (context, index) {
         final partido = partidosNoFinalizados[index];
         return Containerpartido(partido: partido);
