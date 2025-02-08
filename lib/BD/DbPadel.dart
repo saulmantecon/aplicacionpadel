@@ -25,7 +25,6 @@ class DbPadel {
             db.execute("CREATE TABLE usuariopartidos ("
                 "idUsuario INTEGER NOT NULL,"
                 "idPartido INTEGER NOT NULL,"
-                "resultado TEXT,"
                 "PRIMARY KEY (idUsuario, idPartido),"
                 "FOREIGN KEY (idUsuario) REFERENCES usuarios(idUsuario),"
                 "FOREIGN KEY (idPartido) REFERENCES partidos(idPartido))"

@@ -41,7 +41,7 @@ class _HomeViewState extends State<HomeView> {
     // TODO: implement initState
     super.initState();
     Future.delayed(Duration.zero, () {
-      if(mounted){
+      if (mounted) {
         Provider.of<PartidoViewModel>(context, listen: false).cargarPartidos();
       }
     });
@@ -50,16 +50,24 @@ class _HomeViewState extends State<HomeView> {
   @override
   Widget build(BuildContext context) {
     final partidoVM = Provider.of<PartidoViewModel>(context);
+
+    //Filtrar partidos NO finalizados
+    List<Partido> partidosNoFinalizados = partidoVM.listaPartidos.where((
+        partido) => !partido.finalizado).toList();
+
     return GridView.builder(
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: MediaQuery.of(context).size.width > 800 ? 2 : 1,
-        crossAxisSpacing: 10,
-        mainAxisSpacing: 10,
-        mainAxisExtent: 600
+          crossAxisCount: MediaQuery
+              .of(context)
+              .size
+              .width > 800 ? 2 : 1,
+          crossAxisSpacing: 10,
+          mainAxisSpacing: 10,
+          mainAxisExtent: 600
       ),
-      itemCount: partidoVM.listaPartidos.length,
+      itemCount: partidosNoFinalizados.length, // 🔹 Solo partidos activos
       itemBuilder: (context, index) {
-        final partido = partidoVM.listaPartidos[index];
+        final partido = partidosNoFinalizados[index];
         return Containerpartido(partido: partido);
       },
     );

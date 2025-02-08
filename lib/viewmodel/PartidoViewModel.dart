@@ -15,15 +15,24 @@ class PartidoViewModel extends ChangeNotifier{
     listaPartidos.add(partido);
     notifyListeners(); // Notifica a los widgets para que se redibujen
   }
-  void marcarPartidoComoFinalizado(int idPartido) {
+  void finalizarPartido(int idPartido, String resultado, int idGanador1, int idGanador2) async {
+    bool partidoEncontrado = false;
+
     for (var partido in listaPartidos) {
       if (partido.idPartido == idPartido) {
         partido.finalizado = true;
-        notifyListeners();
+        partido.resultado = resultado;
+        partidoEncontrado = true;
         break;
       }
     }
+
+    if (partidoEncontrado) {
+      await DbPartido.finalizarPartido(idPartido, resultado, idGanador1, idGanador2);
+      notifyListeners(); //Solo notificamos si hubo un cambio
+    }
   }
+
 
 
 }

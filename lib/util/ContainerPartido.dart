@@ -1,4 +1,7 @@
 import 'dart:convert';
+import 'package:aplicacionpadel/BD/DbUsuarioPartido.dart';
+import 'package:aplicacionpadel/model/Usuario_Partido.dart';
+import 'package:aplicacionpadel/viewmodel/PartidoViewModel.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../model/Partido.dart';
@@ -50,14 +53,73 @@ class _ContainerpartidoState extends State<Containerpartido> {
       }).toList();
     });
   }
+  //fijarPartido
+  void asignarJugadoresAPartido()async{
+    if(usuario2!=null && usuario3!=null && usuario4!=null ){
+      Usuario_Partido usuario2_partido = Usuario_Partido(idUsuario: usuario2!.idUsuario!, idPartido: widget.partido.idPartido!);
+      Usuario_Partido usuario3_partido = Usuario_Partido(idUsuario: usuario3!.idUsuario!, idPartido: widget.partido.idPartido!);
+      Usuario_Partido usuario4_partido = Usuario_Partido(idUsuario: usuario4!.idUsuario!, idPartido: widget.partido.idPartido!);
+
+      try{
+        await DbUsuarioPartido.insert(usuario2_partido);
+        await DbUsuarioPartido.insert(usuario3_partido);
+        await DbUsuarioPartido.insert(usuario4_partido);
+        setState(() {
+          mostrarResultado=true;
+        });
+
+      }catch(e){
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Error al registrar los usuario_partido')),);
+        }
+      }
+    }else{
+      print("hay algun usuario null");
+    }
+  }//asignarJugadoresAPartido
+
+
+  List<int> determinarGanador(String resultado, int idJugador1, int idJugador2, int idJugador3, int idJugador4) {
+    List<String> sets = resultado.split(","); //Divide el string en sets individuales
+    int setsGanadosEquipo1 = 0;
+    int setsGanadosEquipo2 = 0;
+
+    for (String set in sets) {
+      List<String> puntuaciones = set.trim().split("-"); // 🔹 Divide los números
+      if (puntuaciones.length == 2) {
+        int puntosEquipo1 = int.parse(puntuaciones[0]); // 🔹 Puntos del equipo 1 (Jugador 1 y 2)
+        int puntosEquipo2 = int.parse(puntuaciones[1]); // 🔹 Puntos del equipo 2 (Jugador 3 y 4)
+
+        if (puntosEquipo1 > puntosEquipo2) {
+          setsGanadosEquipo1++; // Equipo 1 gana este set
+        } else {
+          setsGanadosEquipo2++; // Equipo 2 gana este set
+        }
+
+        // 🔹 Si un equipo gana 2 sets, ya es el ganador
+        if (setsGanadosEquipo1 == 2) {
+          return [idJugador1, idJugador2]; //  Gana equipo 1
+        } else if (setsGanadosEquipo2 == 2) {
+          return [idJugador3, idJugador4]; // Gana equipo 2
+        }
+      }
+    }
+
+    //Si el partido llegó hasta el tercer set, el equipo con más sets ganados es el ganador
+    return (setsGanadosEquipo1 > setsGanadosEquipo2) ? [idJugador1, idJugador2] : [idJugador3, idJugador4];
+  }
+
+
+
+
 
   @override
   Widget build(BuildContext context) {
     final usuarioVM = Provider.of<UsuarioViewModel>(context);
+    final partidoVM = Provider.of<PartidoViewModel>(context);
 
     // Verificar si el usuario logueado es el creador del partido
-    bool esCreador =
-        usuarioVM.usuarioActual?.idUsuario == widget.partido.creador.idUsuario;
+    bool esCreador = usuarioVM.usuarioActual?.idUsuario == widget.partido.creador.idUsuario;
 
     return Padding(
       padding: const EdgeInsets.all(16.0),
@@ -78,7 +140,6 @@ class _ContainerpartidoState extends State<Containerpartido> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text("Nº: ${widget.partido.idPartido}"),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -113,13 +174,9 @@ class _ContainerpartidoState extends State<Containerpartido> {
                   ),
                 ],
               ),
-              if (esCreador)
+              if (esCreador && usuario2!=null && usuario3!=null && usuario4!=null)
                 ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      mostrarResultado = true; //Muestra el TextFormField y el botón de finalizar
-                    });
-                  },
+                  onPressed: () => asignarJugadoresAPartido(),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.purple,
                     shape: RoundedRectangleBorder(
@@ -144,13 +201,30 @@ class _ContainerpartidoState extends State<Containerpartido> {
                       ],
                     ),
                     const SizedBox(height: 10),
-
-                    //BOTÓN "FINALIZAR PARTIDO" SOLO SI mostrarResultado ES TRUE
                     ElevatedButton(
                       onPressed: () {
-                        String resultado =
-                            "${set1Controller.text}, ${set2Controller.text}, ${set3Controller.text}";
-                        print("Partido finalizado con resultado: $resultado");
+                        if (set1Controller.text.isEmpty || set2Controller.text.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text("Debes ingresar al menos 2 sets para finalizar el partido.")),
+                          );
+                        }else{
+                          String resultado = "${set1Controller.text}, ${set2Controller.text}, ${set3Controller.text}";
+                          List<int> ganadores = determinarGanador(
+                              resultado, widget.partido.creador.idUsuario!,
+                              usuario2!.idUsuario!,
+                              usuario3!.idUsuario!,
+                              usuario4!.idUsuario!);
+                          try{
+                            partidoVM.finalizarPartido(widget.partido.idPartido!, resultado, ganadores[0], ganadores[1]);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text("Partido finalizado correctamente")),);
+                          }catch(e){
+                            print(e);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text("error al finalizar el partido.")),);
+                          }
+                        }
+
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green,
@@ -246,50 +320,51 @@ class _ContainerpartidoState extends State<Containerpartido> {
             ),
             const SizedBox(width: 8),
             Expanded(
-              child: DropdownButton<Usuario>(
-                isExpanded: true,
-                value: opcionesFiltradas.contains(usuarioSeleccionado)
-                    ? usuarioSeleccionado
-                    : null,
-                hint: const Text("Selecciona un jugador"),
-                onChanged: (Usuario? nuevoUsuario) {
-                  if (nuevoUsuario != null) {
-                    setState(() {
-                      if (numeroJugador == 2) usuario2 = nuevoUsuario;
-                      if (numeroJugador == 3) usuario3 = nuevoUsuario;
-                      if (numeroJugador == 4) usuario4 = nuevoUsuario;
-                      actualizarUsuariosDisponibles();
-                    });
-                  }
-                },
-                underline: const SizedBox(),
-                items: opcionesFiltradas.map((Usuario usuario) {
-                  return DropdownMenuItem<Usuario>(
-                    value: usuario,
-                    child: Row(
-                      children: [
-                        CircleAvatar(
-                          backgroundImage: usuario.imagen.isNotEmpty
-                              ? MemoryImage(base64Decode(usuario.imagen))
-                              : const NetworkImage(
-                                      "https://www.l3tcraft.com/wp-content/uploads/2023/01/Knekro.webp")
-                                  as ImageProvider,
-                          radius: 15,
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            usuario.nombreUsuario,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.purple[700]),
+              child: IgnorePointer(
+                ignoring: mostrarResultado,
+                child: DropdownButton<Usuario>(
+                  isExpanded: true,
+                  value: opcionesFiltradas.contains(usuarioSeleccionado) ? usuarioSeleccionado : null,
+                  hint: const Text("Selecciona un jugador"),
+                  onChanged: (Usuario? nuevoUsuario) {
+                    if (nuevoUsuario != null) {
+                      setState(() {
+                        if (numeroJugador == 2) usuario2 = nuevoUsuario;
+                        if (numeroJugador == 3) usuario3 = nuevoUsuario;
+                        if (numeroJugador == 4) usuario4 = nuevoUsuario;
+                        actualizarUsuariosDisponibles();
+                      });
+                    }
+                  },
+                  underline: const SizedBox(),
+                  items: opcionesFiltradas.map((Usuario usuario) {
+                    return DropdownMenuItem<Usuario>(
+                      value: usuario,
+                      child: Row(
+                        children: [
+                          CircleAvatar(
+                            backgroundImage: usuario.imagen.isNotEmpty
+                                ? MemoryImage(base64Decode(usuario.imagen))
+                                : const NetworkImage(
+                                        "https://www.l3tcraft.com/wp-content/uploads/2023/01/Knekro.webp")
+                                    as ImageProvider,
+                            radius: 15,
                           ),
-                        ),
-                      ],
-                    ),
-                  );
-                }).toList(),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              usuario.nombreUsuario,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.purple[700]),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ),
               ),
             ),
           ],
@@ -306,19 +381,13 @@ class _ContainerpartidoState extends State<Containerpartido> {
         child: Row(
           children: [
             CircleAvatar(
-              backgroundImage: usuarioSeleccionado?.imagen.isNotEmpty == true
-                  ? MemoryImage(base64Decode(usuarioSeleccionado!.imagen))
-                  : const NetworkImage(
-                          "https://www.l3tcraft.com/wp-content/uploads/2023/01/Knekro.webp")
-                      as ImageProvider,
+              backgroundImage: usuarioSeleccionado?.imagen.isNotEmpty == true ? MemoryImage(base64Decode(usuarioSeleccionado!.imagen)) : const NetworkImage(
+                          "https://www.l3tcraft.com/wp-content/uploads/2023/01/Knekro.webp") as ImageProvider,
               radius: 20,
             ),
             const SizedBox(width: 8),
             Expanded(
-              child: Text(
-                usuarioSeleccionado != null
-                    ? usuarioSeleccionado.nombreUsuario
-                    : "No asignado",
+              child: Text(usuarioSeleccionado != null ? usuarioSeleccionado.nombreUsuario : "No asignado",
                 style: TextStyle(
                     fontWeight: FontWeight.bold, color: Colors.purple[700]),
                 overflow: TextOverflow.ellipsis,
@@ -330,7 +399,7 @@ class _ContainerpartidoState extends State<Containerpartido> {
     }
   }
 
-  // 🔹 WIDGET PARA CREAR CADA TEXTFORMFIELD (SET)
+  //WIDGET PARA CREAR CADA TEXTFORMFIELD (SET)
   Widget _buildSetInput(String label, TextEditingController controller) {
     return Column(
       children: [

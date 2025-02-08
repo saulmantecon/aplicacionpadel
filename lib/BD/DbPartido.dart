@@ -61,6 +61,20 @@ class DbPartido {
     );
   } //update
 
+  static Future<void> finalizarPartido(int idPartido, String resultado, int idGanador1, int idGanador2) async {
+    final db = await DbPadel.openDB();
 
+    // 🔹 1. Actualizar el partido en la base de datos con el resultado
+    await db.update(
+      "partidos",
+      {"finalizado": 1, "resultado": resultado},
+      where: "idPartido = ?",
+      whereArgs: [idPartido],
+    );
 
+    // 🔹 2. Sumar 3 puntos a los dos jugadores del equipo ganador
+    await db.rawUpdate("UPDATE usuarios SET puntos = puntos + 3 WHERE idUsuario = ?", [idGanador1]);
+    await db.rawUpdate("UPDATE usuarios SET puntos = puntos + 3 WHERE idUsuario = ?", [idGanador2]);
+  }
 }
+
